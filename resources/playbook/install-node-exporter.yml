@@ -9,7 +9,7 @@
 
     - name: Extract Node Exporter
       unarchive:
-        src: /tmp/node_exporter_linux_amd64.tar.gz
+        src: /tmp/node_exporter_linux-amd64.tar.gz
         dest: /usr/local/bin/
         remote_src: yes
         extra_opts: --strip-components=1

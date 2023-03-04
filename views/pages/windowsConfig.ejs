@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+</head>
+<body class="g-sidenav-show   bg-gray-100">
+  <div class="min-height-300 bg-primary position-absolute w-100"></div>
+  <%- include('../partials/sidebar') %>
+  <main class="main-content position-relative border-radius-lg ">
+    <%- include('../partials/nav') %>
+    <div class="container-fluid py-4">
+      <div class="row mt-4">
+        <div class="col-lg-7 mb-lg-0 mb-4">
+          <div class="card ">
+            <div class="card-header pb-0 p-3">
+              <div class="d-flex justify-content-between">
+                <div class="row">
+                    <div class="col-4">
+                        <img src="/assets/img/monitor/windows.png" width="100" alt="" srcset="">
+                    </div>
+                    <div class="col-8">
+                        <h6 class="mb-2">Windows Host</h6>
+                        <p>Support : Windows Server 2022, Windows10</p>
+                    </div>
+                </div>
+              </div>
+            </div>
+            <hr>
+            <div class="table-responsive">
+              <table class="table align-items-center ">
+                <thead>
+                    <tr>
+                        <th>IP Host</th>
+                        <th>Username</th>
+                        <th>Protocol</th>
+                        <th>Username</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="w-30">
+                        <input type="text" class="form-control">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" disabled value="winrm">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="w-30">
+                        <input type="text" class="form-control">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" disabled value="winrm">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <center>
+                <button class="btn btn-primary btn-sm ms-auto">Add rows</button>
+            </center>
+          </div>
+        </div>
+      </div>
+  <%- include('../partials/footer') %>

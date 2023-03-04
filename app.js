@@ -91,8 +91,16 @@ app.post('/WindowsConfig/SaveFile',(req,res) => {
       if (err) throw err;
       console.log('Host json has been saved!');
     });
-  
-    fs.writeFile(__dirname+'/resources/inventory/windows_host.ini', req.body.text, function (err) {
+    let sumtext = req.body.text +
+    ` [win:vars]
+      ansible_connection=winrm
+      ansible_port=5985
+      ansible_winrm_server_cert_validation=ignore
+      ansible_winrm_scheme=http
+      ansible_winrm_transport=basic
+      ansible_winrm_kerberos_delegation=true`;
+      
+    fs.writeFile(__dirname+'/resources/inventory/windows_host.ini', sumtext, function (err) {
       if (err) throw err;
       console.log('File has been saved!');
       res.status(200).send('ok');

@@ -1,0 +1,14 @@
+---
+- name: Install Windows-exporter on nodes
+  hosts: win
+  tasks:
+    - name: Copy ==> windows-exporter.tar file
+      copy:
+        src: $(pwd)/resources/windows_exporter_amd64.msi
+        dest: C:\Windows\Temp
+
+    - name: Install package
+      win_package:
+        path: C:\Windows\Temp\windows_exporter_amd64.msi
+        arguments: /qn
+        product_id: "{<product_id>}"

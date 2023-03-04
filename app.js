@@ -29,8 +29,22 @@ app.get('/linux',(req,res) => {
 app.get('/windows',(req,res) => {
   res.render('pages/windowsConfig')
 })
-app.get('/ReadFile',(req,res) => {
+app.get('/prometheus',(req,res) => {
+  res.render('pages/prometheusConfig')
+})
+app.get('/LinuxConfig/ReadFile',(req,res) => {
   var inventory = fs.readFileSync('resources/inventory/linux_host.json','utf8'); 
+  console.log(inventory);
+  let data ;
+  if(inventory == ""){
+    data = 'empty';
+  }else{
+    data = inventory;
+  }
+  res.status(200).send(data);
+})
+app.get('/WindowsConfig/ReadFile',(req,res) => {
+  var inventory = fs.readFileSync('resources/inventory/windows_host.json','utf8'); 
   console.log(inventory);
   let data ;
   if(inventory == ""){
@@ -71,10 +85,47 @@ app.post('/LinuxConfig/SaveFile',(req,res) => {
   }
 })
 
+app.post('/WindowsConfig/SaveFile',(req,res) => {
+  try {
+    fs.writeFile(__dirname+'/resources/inventory/windows_host.json',JSON.stringify(req.body.text_json), function (err) {
+      if (err) throw err;
+      console.log('Host json has been saved!');
+    });
+  
+    fs.writeFile(__dirname+'/resources/inventory/windows_host.ini', req.body.text, function (err) {
+      if (err) throw err;
+      console.log('File has been saved!');
+      res.status(200).send('ok');
+    });
+  } catch (error) {
+    console.log(error);
+  }
+})
+
 app.get('/InstallNodeExporter',(req,res) => {
   const cmd = `
-  cat $(pwd)/resources/inventory/linux_host.ini \
+  cat $(pwd)/resources/inventory/linux_host.ini; \
+  ansible linux -m ping -i $(pwd)/resources/inventory/linux_host.ini; \
   ansible-playbook  $(pwd)/resources/playbook/install-node-exporter.yml -i $(pwd)/resources/inventory/linux_host.ini
+  `;
+  var response;
+  subProcess.exec(cmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err)
+        process.exit(1)
+      } else {
+        response = stdout
+        console.log(response);
+        res.status(200).send(response);
+      }
+    })
+
+})
+
+app.get('/InstallWindowsExporter',(req,res) => {
+  const cmd = `
+  cat $(pwd)/resources/inventory/windows_host.ini; \
+  ansible -m win_ping win -i $(pwd)/resources/inventory/windows_host.ini; \
   `;
   var response;
   subProcess.exec(cmd, (err, stdout, stderr) => {

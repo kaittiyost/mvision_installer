@@ -1,77 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <%- include('../partials/head') %>
-</head>
-<body class="g-sidenav-show   bg-gray-100">
-  <div class="min-height-300 bg-primary position-absolute w-100"></div>
-  <%- include('../partials/sidebar') %>
-  <main class="main-content position-relative border-radius-lg ">
-    <%- include('../partials/nav') %>
-    <div class="container-fluid py-4">
-      <div class="row mt-4">
-        <div class="col-lg-7 mb-lg-0 mb-4">
-          <div class="card ">
-            <div class="card-header pb-0 p-3">
-              <div class="d-flex justify-content-between">
-                <div class="row">
+    <script>
+      let jsonData = {};
+      let dataLength = 0;
+
+      var row = 0;
+      let counter = 0;
+
+      window.onload = function () {
+        $.ajax({
+          url: "/WindowsConfig/ReadFile",
+          method: "GET",
+          data: { type: "linux" },
+          success: function (response) {
+            if (response == "empty") {
+              $("#tableHost").html("Host net set.");
+              $("#btnAction").attr("onclick", "saveFile()");
+            } else {
+              const toJson = JSON.parse(response);
+              console.log(toJson);
+              dataLength = Object.keys(toJson).length;
+              console.log(dataLength);
+              for (i = 0; i < Object.keys(toJson).length; i++) {
+                let key_array = [];
+                key_array.push(toJson[`row${i}`][0]);
+                key_array.push(toJson[`row${i}`][1]);
+
+                console.log('key_array :'+key_array);
+
+                jsonData[`row${i}`] = key_array;
+
+                $("#tableBodyHost").append(
+                  `
+                        <tr>
+                            <th scope="row">${i + 1}</th>
+                            <td>${JSON.parse(response)[`row${i}`][0]}</td>
+                            <td>${JSON.parse(response)[`row${i}`][1]}</td>
+                        </tr>
+                        `
+                );
+                row++;counter++;
+                $("#table_body").append(
+                  `<tr id="row${i}">
+                            <td id="row${i}col0">
+                                <input type="text" id="input_row${i}col0" class="form-control" value="${
+                    JSON.parse(response)[`row${i}`][0]
+                  }">
+                            </td>
+                            <td id="row${i}col1">
+                                <input type="text" id="input_row${i}col1" class="form-control" value="${
+                    JSON.parse(response)[`row${i}`][1]
+                  }">
+                            </td>
+                            <td id="row${i}col1">
+                                <input type="password" id="input_row${i}col2" class="form-control" value="${
+                    JSON.parse(response)[`row${i}`][1]
+                  }">
+                            </td>
+                            <td id="row${i}col2">
+                                <input type="text" class="form-control" disabled value="winrm">
+                            </td>
+                            <td id="row${i}col3">
+                                <a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${row})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
+                            </td>
+                        </tr>`
+                );
+                $("#btnAction").attr("onclick", "saveFile()");
+              }
+            }
+          },
+          error: function (xhr, status, error) {
+            console.error(xhr.responseText);
+          },
+        });
+      };
+    </script>
+  </head>
+  <body class="g-sidenav-show bg-gray-100">
+    <div class="min-height-300 bg-dark position-absolute w-100"></div>
+    <%- include('../partials/sidebar') %>
+    <main class="main-content position-relative border-radius-lg">
+      <%- include('../partials/nav') %>
+      <div class="container-fluid py-4">
+        <div class="row mt-4">
+          <div class="col-lg-7 mb-lg-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0 p-3">
+                <div class="d-flex justify-content-between">
+                  <div class="row">
                     <div class="col-4">
-                        <img src="/assets/img/monitor/windows.png" width="100" alt="" srcset="">
+                      <img
+                        src="/assets/img/monitor/windows.png"
+                        width="100"
+                        alt=""
+                        srcset=""
+                      />
                     </div>
                     <div class="col-8">
-                        <h6 class="mb-2">Windows Host</h6>
-                        <p>Support : Windows Server 2022, Windows10</p>
+                      <h6 class="mb-2">Windows Host</h6>
+                      <p>Support : Windows Server, Windows 10</p>
                     </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <hr>
-            <div class="table-responsive">
-              <table class="table align-items-center ">
-                <thead>
+              <hr />
+              <div class="table-responsive">
+                <table class="table align-items-center">
+                  <thead>
                     <tr>
-                        <th>IP Host</th>
-                        <th>Username</th>
-                        <th>Protocol</th>
-                        <th>Username</th>
+                      <th>IP Host</th>
+                      <th>Username</th>
+                      <th>Password</th>
+                      <th>Protocol</th>
+                      <th>Action</th>
                     </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="w-30">
-                        <input type="text" class="form-control">
+                  </thead>
+                  <tbody id="table_body">
+                    <!-- <tr id="row0">
+                    <td id="row0col0">
+                        <input type="text" id="input_row0col0" class="form-control">
                     </td>
-                    <td>
-                        <input type="text" class="form-control">
+                    <td id="row0col1">
+                        <input type="text" id="input_row0col1" class="form-control">
                     </td>
-                    <td>
-                        <input type="text" class="form-control">
+                    <td id="row0col2">
+                        <input type="text" class="form-control" disabled value="ssh">
                     </td>
-                    <td>
-                        <input type="text" class="form-control" disabled value="winrm">
+                    <td id="row0col3">
+                        <a class="btn btn-link text-danger text-gradient px-3 mb-0" href="javascript:;"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
                     </td>
-                  </tr>
-                  <tr>
-                    <td class="w-30">
-                        <input type="text" class="form-control">
-                    </td>
-                    <td>
-                        <input type="text" class="form-control">
-                    </td>
-                    <td>
-                        <input type="text" class="form-control">
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" disabled value="winrm">
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                  </tr> -->
+                  </tbody>
+                </table>
+              </div>
+              <center>
+                <button class="btn btn-success btn-sm ms-auto" id="btnAction">
+                  Save
+                </button>
+                <button
+                  class="btn btn-primary btn-sm ms-auto"
+                  onclick="addRow()"
+                >
+                  Add Host
+                </button>
+              </center>
             </div>
-            <center>
-                <button class="btn btn-primary btn-sm ms-auto">Add rows</button>
-            </center>
+          </div>
+          <div class="col-lg-5 mb-lg-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0 p-3">
+                <h6 class="mb-2">All Windows Host</h6>
+                <button class="btn btn-danger" id="btnInstall" onclick="InstallWindowsExporter()">Install Windows-Exporter</button>
+              </div>
+              <div class="card-body">
+                <table class="table table-striped table-hover" id="tableHost">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">HOST</th>
+                      <th scope="col">User</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableBodyHost"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
+        <div class="row mt-4" id="Console" tabindex="0">
+          <div class="col-lg-12 mb-lg-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0 p-3 bg-dark">
+                <h6 class="mb-2 text-light font-weight-bold">Console</h6>
+              </div>
+              <div class="card-body" style="background-color: black;">
+               <pre class="text-info" id="output"></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <script>
+          function addRow() {
+            $("#table_body").append(
+              `<tr id="row${row}">
+                    <td id="row${row}col0">
+                        <input type="text" id="input_row${row}col0" class="form-control">
+                    </td>
+                    <td id="row${row}col1">
+                        <input type="text" id="input_row${row}col1" class="form-control">
+                    </td>
+                    <td id="row${row}col1">
+                        <input type="password" id="input_row${row}col2" class="form-control">
+                    </td>
+                    <td id="row${row}col2">
+                        <input type="text" class="form-control" disabled value="winrm">
+                    </td>
+                    <td id="row${row}col3">
+                        <a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${row})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
+                    </td>
+                </tr>`
+            );
+            row++;
+            counter++;
+            console.log("counter =" + counter);
+          }
+
+          function saveFile() {
+            let text = "[win] \n";
+            console.log("row = " + row);
+            console.log("connter = " + counter);
+            if (row == 0) {
+                jsonData = 0;
+            } else {
+              for (c = 0; c <= counter; c++) {
+                if ($(`#input_row${c}col${0}`).val() === undefined) {
+                } else {
+                  let key_array = [];
+                  key_array.push($(`#input_row${c}col${0}`).val());
+                  key_array.push($(`#input_row${c}col${1}`).val());
+                  key_array.push($(`#input_row${c}col${2}`).val());
+                  jsonData[`row${c}`] = key_array;
+                  text += `${$(`#input_row${c}col${0}`).val()} ansible_user=${$(`#input_row${c}col${1}`).val()} ansible_password=${$(
+                    `#input_row${c}col${2}`
+                  ).val()} \n`;
+                }
+              }
+            }
+            //console.log(text);
+
+            $.ajax({
+              url: "/WindowsConfig/SaveFile",
+              method: "POST",
+              data: { text: text, text_json: jsonData },
+              success: function (response) {
+                if (response == "ok") {
+                  alert("Windows host is ready.");
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
+
+          function removeRow(row){
+            console.log('removeRow '+row);
+            counter = counter - 1; 
+            $(`#row${row-1}`).remove(0); 
+       
+            delete jsonData[`row${row-1}`];
+            console.log(jsonData);
+          }
+
+
+          function InstallWindowsExporter() {
+            $('#btnInstall').attr('disabled',true)
+            $('#Console').focus()
+            $('#output').append('Installing...')
+            $.ajax({
+              url: "/InstallWindowsExporter",
+              method: "GET",
+              success: function (response) {
+                console.log(response);
+                $('#output').append(response)
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
+        </script>
+        <%- include('../partials/footer') %>
       </div>
-  <%- include('../partials/footer') %>
+    </main>
+  </body>
+</html>

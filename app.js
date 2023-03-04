@@ -99,7 +99,7 @@ app.post('/WindowsConfig/SaveFile',(req,res) => {
       ansible_winrm_scheme=http
       ansible_winrm_transport=basic
       ansible_winrm_kerberos_delegation=true`;
-      
+
     fs.writeFile(__dirname+'/resources/inventory/windows_host.ini', sumtext, function (err) {
       if (err) throw err;
       console.log('File has been saved!');
@@ -111,10 +111,10 @@ app.post('/WindowsConfig/SaveFile',(req,res) => {
 })
 
 app.get('/InstallNodeExporter',(req,res) => {
+  //ansible-playbook  $(pwd)/resources/playbook/install-node-exporter.yml -i $(pwd)/resources/inventory/linux_host.ini
   const cmd = `
   cat $(pwd)/resources/inventory/linux_host.ini; \
   ansible linux -m ping -i $(pwd)/resources/inventory/linux_host.ini; \
-  ansible-playbook  $(pwd)/resources/playbook/install-node-exporter.yml -i $(pwd)/resources/inventory/linux_host.ini
   `;
   var response;
   subProcess.exec(cmd, (err, stdout, stderr) => {

@@ -1,0 +1,32 @@
+- name: Install Node Exporter to node
+  hosts: linux
+  tasks:
+
+    - name: Copy ==> node-exporter.tar file
+      copy:
+        src: $(pwd)/resources/node_exporter-linux-amd64.tar.gz
+        dest: /tmp
+
+    - name: Extract Node Exporter
+      unarchive:
+        src: /tmp/node_exporter_linux_amd64.tar.gz
+        dest: /usr/local/bin/
+        remote_src: yes
+        extra_opts: --strip-components=1
+
+    - name: Create Node Exporter user
+      user:
+        name: node_exporter
+        system: yes
+        shell: /bin/false
+
+    - name: Copy ==> node-exporter.service file
+      copy:
+        src: $(pwd)/resources/node_exporter.service
+        dest: /etc/systemd/system/
+
+    - name: Run daemon reload command
+      command: systemctl daemon-reload
+
+    - name: Run start node_exporter  command
+      command: systemctl start node_exporter

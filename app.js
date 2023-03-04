@@ -6,7 +6,6 @@ var fs = require('fs');
 
 let token;
 const subProcess = require('child_process')
-var session = require('express-session');
 
 app.set('view engine','ejs')
 
@@ -72,6 +71,24 @@ app.post('/LinuxConfig/SaveFile',(req,res) => {
   }
 })
 
+app.get('/InstallNodeExporter',(req,res) => {
+  const cmd = `
+  cat $(pwd)/resources/inventory/linux_host.ini \
+  ansible-playbook  $(pwd)/resources/playbook/install-node-exporter.yml -i $(pwd)/resources/inventory/linux_host.ini
+  `;
+  var response;
+  subProcess.exec(cmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err)
+        process.exit(1)
+      } else {
+        response = stdout
+        console.log(response);
+        res.status(200).send(response);
+      }
+    })
+
+})
 
 app.get('/login',(req,res) => {
     const cmd = "curl -k -X POST -H 'Accept:application/json' --basic -u intern@vsphere.local:1qaz2wsx#EDC \

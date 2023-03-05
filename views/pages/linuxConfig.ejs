@@ -86,25 +86,25 @@
               <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
                   <div class="row">
-                    <div class="col-3">
-                      <a class="btn btn-outline-danger" href="/homepage"><i class="ni ni-bold-left" aria-hidden="true"></i> Back</a> 
-                    </div>
-                    <div class="col-5">
-                      <h6 class="mb-2">Linux Host</h6>
-                      <p>Support : Ubuntu Server, RHEL7</p>  
+                    <div class="col-2">
+                      <a class="btn btn-icon-only btn-rounded btn-outline-dark mb-0 me-3 btn-md d-flex align-items-center justify-content-center" href="/"><i class="ni ni-bold-left" aria-hidden="true"></i></a> 
+                      <br>
                     </div>
                     <div class="col-2">
                       <img
                       src="/assets/img/monitor/linux.png"
-                      width="100"
+                      width="60"
                       alt=""
-                      srcset=""
+                      class="mt-3"
                     />
+                    </div>
+                    <div class="col-6">
+                      <h6 class="mb-2">Linux Host</h6>
+                      <p>Support : Ubuntu Server, RHEL7</p>  
                     </div>
                   </div>
                 </div>
               </div>
-              <hr />
               <div class="table-responsive">
                 <table class="table align-items-center">
                   <thead>
@@ -256,7 +256,7 @@
 
 
           function PingLinuxNode() {
-            $('#btnInstall').attr('disabled',true)
+            //$('#btnInstall').attr('disabled',true)
             $('#Console').focus()
             $('#output').append("[Test Ping] \n")
             $.ajax({

@@ -56,7 +56,7 @@
                             </td>
                             <td id="row${i}col1">
                                 <input type="password" id="input_row${i}col2" class="form-control" value="${
-                    JSON.parse(response)[`row${i}`][1]
+                    JSON.parse(response)[`row${i}`][2]
                   }">
                             </td>
                             <td id="row${i}col2">
@@ -254,6 +254,22 @@
             console.log(jsonData);
           }
 
+          function PingWindowsNode() {
+            $('#btnInstall').attr('disabled',true)
+            $('#Console').focus()
+            $('#output').append("[Test Ping] \n")
+            $.ajax({
+              url: "/PingWindowsNode",
+              method: "GET",
+              success: function (response) {
+                console.log(response);
+                $('#output').append(response)
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
 
           function InstallWindowsExporter() {
             $('#btnInstall').attr('disabled',true)

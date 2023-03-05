@@ -4,12 +4,12 @@ const port = 3009
 const path = require("path")
 var fs = require('fs'); 
 
-let token;
+const { networkInterfaces } = require('os');
+const nets = networkInterfaces();
+
 const subProcess = require('child_process')
 
 app.set('view engine','ejs')
-
-const oneDay = 1000 * 60 * 60 * 24;
 
 let assetsDir = path.join(__dirname,"assets")
 app.use('/assets',express.static(assetsDir))
@@ -17,6 +17,21 @@ app.use('/assets',express.static(assetsDir))
 app.use(express.urlencoded({ extended: true }))
 
 app.get('/',(req,res) => {
+  const results = Object.create(null);
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+        // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+        // 'IPv4' is in Node <= 17, from 18 it's a number 4 or 6
+        const familyV4Value = typeof net.family === 'string' ? 'IPv4' : 4
+        if (net.family === familyV4Value && !net.internal) {
+            if (!results[name]) {
+                results[name] = [];
+            }
+            results[name].push(net.address);
+        }
+    }
+  }
+  console.log(results);
   res.render('pages/index')
 })
 app.get('/linux',(req,res) => {
@@ -44,6 +59,17 @@ app.get('/LinuxConfig/ReadFile',(req,res) => {
   res.status(200).send(data);
 })
 app.get('/WindowsConfig/ReadFile',(req,res) => {
+  var inventory = fs.readFileSync('resources/inventory/windows_host.json','utf8'); 
+  console.log(inventory);
+  let data ;
+  if(inventory == ""){
+    data = 'empty';
+  }else{
+    data = inventory;
+  }
+  res.status(200).send(data);
+})
+app.get('/PrometheusConfig/ReadFile',(req,res) => {
   var inventory = fs.readFileSync('resources/inventory/windows_host.json','utf8'); 
   console.log(inventory);
   let data ;
@@ -110,11 +136,65 @@ app.post('/WindowsConfig/SaveFile',(req,res) => {
   }
 })
 
+app.post('/PrometheusConfig/SaveFile',(req,res) => {
+  try {
+    fs.writeFile(__dirname+'/resources/inventory/windows_host.json',JSON.stringify(req.body.text_json), function (err) {
+      if (err) throw err;
+      console.log('Host json has been saved!');
+    });
+    let sumtext = req.body.text 
+    fs.writeFile(__dirname+'/resources/inventory/windows_host.ini', sumtext, function (err) {
+      if (err) throw err;
+      console.log('File has been saved!');
+      res.status(200).send('ok');
+    });
+  } catch (error) {
+    console.log(error);
+  }
+})
+
+app.get('/PingLinuxNode',(req,res) => {
+  const cmd = `
+  ansible linux -m ping -i $(pwd)/resources/inventory/linux_host.ini \
+  `;
+  var response;
+  subProcess.exec(cmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err)
+        process.exit(1)
+      } else {
+        response = stdout
+        console.log(response);
+        res.status(200).send(response);
+      }
+    })
+
+})
+
+app.get('/PingWindowsNode',(req,res) => {
+  const cmd = `
+  ansible -m win_ping win -i $(pwd)/resources/inventory/windows_host.ini;
+  `;
+  var response;
+  subProcess.exec(cmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err)
+        process.exit(1)
+      } else {
+        response = stdout
+        console.log(response);
+        res.status(200).send(response);
+      }
+    })
+
+})
+
 app.get('/InstallNodeExporter',(req,res) => {
+  //ansible linux -m ping -i $(pwd)/resources/inventory/linux_host.ini
   //ansible-playbook  $(pwd)/resources/playbook/install-node-exporter.yml -i $(pwd)/resources/inventory/linux_host.ini
   const cmd = `
   cat $(pwd)/resources/inventory/linux_host.ini; \
-  ansible linux -m ping -i $(pwd)/resources/inventory/linux_host.ini; \
+   \
   `;
   var response;
   subProcess.exec(cmd, (err, stdout, stderr) => {

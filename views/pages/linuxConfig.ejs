@@ -38,6 +38,7 @@
                             <th scope="row">${i + 1}</th>
                             <td>${JSON.parse(response)[`row${i}`][0]}</td>
                             <td>${JSON.parse(response)[`row${i}`][1]}</td>
+                            <td><button class="btn btn-sm ms-auto btn-outline-primary">Curl</button></td>
                         </tr>
                         `
                 );
@@ -145,7 +146,8 @@
           <div class="col-lg-5 mb-lg-0 mb-4">
             <div class="card">
               <div class="card-header pb-0 p-3">
-                <h6 class="mb-2">All Linux Host</h6>
+                <h6 class="mb-2">All Linux Host</h6> 
+                <button class="btn btn-outline-danger" onclick="PingLinuxNode()">Test Ping</button>
                 <button class="btn btn-danger" id="btnInstall" onclick="InstallNodeExporter()">Install Node-Exporter</button>
               </div>
               <div class="card-body">
@@ -155,6 +157,7 @@
                       <th scope="col">#</th>
                       <th scope="col">HOST</th>
                       <th scope="col">User</th>
+                      <th>Test</th>
                     </tr>
                   </thead>
                   <tbody id="tableBodyHost"></tbody>
@@ -172,6 +175,9 @@
               <div class="card-body" style="background-color: black;">
                <pre class="text-info" id="output"></pre>
               </div>
+              <div class="card-footer bg-secondary pb-0 p-3">
+                <button class="btn btn-light" onclick="clearConsole()">Clear</button>
+               </div>
             </div>
           </div>
         </div>
@@ -246,6 +252,23 @@
           }
 
 
+          function PingLinuxNode() {
+            $('#btnInstall').attr('disabled',true)
+            $('#Console').focus()
+            $('#output').append("[Test Ping] \n")
+            $.ajax({
+              url: "/PingLinuxNode",
+              method: "GET",
+              success: function (response) {
+                console.log(response);
+                $('#output').append(response)
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
+
           function InstallNodeExporter() {
             $('#btnInstall').attr('disabled',true)
             $('#Console').focus()
@@ -261,6 +284,12 @@
                 console.error(xhr.responseText);
               },
             });
+          }
+
+
+        
+          function clearConsole(){
+            $('#output').empty();
           }
         </script>
         <%- include('../partials/footer') %>

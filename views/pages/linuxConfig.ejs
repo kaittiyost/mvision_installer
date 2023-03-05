@@ -38,7 +38,7 @@
                             <th scope="row">${i + 1}</th>
                             <td>${JSON.parse(response)[`row${i}`][0]}</td>
                             <td>${JSON.parse(response)[`row${i}`][1]}</td>
-                            <td><button class="btn btn-sm ms-auto btn-outline-primary">Curl</button></td>
+                            <td><button class="btn btn-sm ms-auto btn-outline-primary" onclick="CurlExporter('${JSON.parse(response)[`row${i}`][0]}')">Curl</button></td>
                         </tr>
                         `
                 );
@@ -86,17 +86,20 @@
               <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
                   <div class="row">
-                    <div class="col-4">
-                      <img
-                        src="/assets/img/monitor/linux.webp"
-                        width="100"
-                        alt=""
-                        srcset=""
-                      />
+                    <div class="col-3">
+                      <a class="btn btn-outline-danger" href="/homepage"><i class="ni ni-bold-left" aria-hidden="true"></i> Back</a> 
                     </div>
-                    <div class="col-8">
+                    <div class="col-5">
                       <h6 class="mb-2">Linux Host</h6>
-                      <p>Support : Ubuntu, Redhat</p>
+                      <p>Support : Ubuntu Server, RHEL7</p>  
+                    </div>
+                    <div class="col-2">
+                      <img
+                      src="/assets/img/monitor/linux.png"
+                      width="100"
+                      alt=""
+                      srcset=""
+                    />
                     </div>
                   </div>
                 </div>
@@ -265,6 +268,7 @@
               },
               error: function (xhr, status, error) {
                 console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
               },
             });
           }
@@ -286,7 +290,24 @@
             });
           }
 
-
+          function CurlExporter(ipaddress) {
+            //$('#btnInstall').attr('disabled',true)
+            $('#Console').focus()
+            $('#output').append('curl... ['+ipaddress+':9100] \n')
+            $.ajax({
+              url: "/CurlExporter",
+              method: "POST",
+              data:{ipaddr:ipaddress},
+              success: function (response) {
+                console.log(response);
+                $('#output').append(response)
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
+            });
+          }
         
           function clearConsole(){
             $('#output').empty();

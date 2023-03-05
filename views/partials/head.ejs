@@ -1,7 +1,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link rel="apple-touch-icon" sizes="76x76" href="/assets/img/apple-icon.png">
-<link rel="icon" type="image/png" href="/assets/img/favicon.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/assets/img/monitor/mfec-mini-logo.png">
+<link rel="icon" type="image/png" href="/assets/img/monitor/mfec-mini-logo.png">
 <title>
   MFEC | Mvision
 </title>
@@ -24,7 +24,15 @@
   crossorigin="anonymous"></script>
 
   <style>
-    .onmoursehover:hover {
+    #title{
+      visibility: hidden;
+    }
+    .onmoursehover:hover #title {
       background-color: rgb(240, 240, 240);
+      transform: scale(1.025);
+      visibility: visible;
+      opacity: 1;
+     
+      transition-delay: 0.3s;
     }
   </style>

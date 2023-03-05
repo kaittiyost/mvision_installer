@@ -158,10 +158,10 @@ app.get('/PingLinuxNode',(req,res) => {
   ansible linux -m ping -i $(pwd)/resources/inventory/linux_host.ini \
   `;
   var response;
-  subProcess.exec(cmd, (err, stdout, stderr) => {
+    subProcess.exec(cmd, (err, stdout, stderr) => {
       if (err) {
         console.error(err)
-        process.exit(1)
+        res.status(500).send(stderr);
       } else {
         response = stdout
         console.log(response);
@@ -179,7 +179,7 @@ app.get('/PingWindowsNode',(req,res) => {
   subProcess.exec(cmd, (err, stdout, stderr) => {
       if (err) {
         console.error(err)
-        process.exit(1)
+        res.status(500).send(stderr);
       } else {
         response = stdout
         console.log(response);
@@ -200,7 +200,7 @@ app.get('/InstallNodeExporter',(req,res) => {
   subProcess.exec(cmd, (err, stdout, stderr) => {
       if (err) {
         console.error(err)
-        process.exit(1)
+        res.status(500).send(stderr);
       } else {
         response = stdout
         console.log(response);
@@ -219,7 +219,26 @@ app.get('/InstallWindowsExporter',(req,res) => {
   subProcess.exec(cmd, (err, stdout, stderr) => {
       if (err) {
         console.error(err)
-        process.exit(1)
+        res.status(500).send(stderr);
+      } else {
+        response = stdout
+        console.log(response);
+        res.status(200).send(response);
+      }
+    })
+
+})
+
+app.post('/CurlExporter',(req,res) => {
+  const ipaddress = req.body.ipaddr;
+  const cmd = `
+  curl http://${ipaddress}:9100/metrix \
+  `;
+  var response;
+  subProcess.exec(cmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err)
+        res.status(500).send(stderr);
       } else {
         response = stdout
         console.log(response);

@@ -38,6 +38,7 @@
                             <th scope="row">${i + 1}</th>
                             <td>${JSON.parse(response)[`row${i}`][0]}</td>
                             <td>${JSON.parse(response)[`row${i}`][1]}</td>
+                            <td><button class="btn btn-sm ms-auto btn-outline-primary" onclick="CurlExporter('${JSON.parse(response)[`row${i}`][0]}')">Curl</button></td>
                         </tr>
                         `
                 );
@@ -90,17 +91,20 @@
               <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
                   <div class="row">
-                    <div class="col-4">
-                      <img
-                        src="/assets/img/monitor/windows.png"
-                        width="100"
-                        alt=""
-                        srcset=""
-                      />
+                    <div class="col-3">
+                      <a class="btn btn-outline-danger" href="/homepage"><i class="ni ni-bold-left" aria-hidden="true"></i> Back</a> 
                     </div>
-                    <div class="col-8">
+                    <div class="col-5">
                       <h6 class="mb-2">Windows Host</h6>
-                      <p>Support : Windows Server, Windows 10</p>
+                      <p>Support : Windows Server, Windows 10</p>  
+                    </div>
+                    <div class="col-2">
+                      <img
+                      src="/assets/img/monitor/windows.png"
+                      width="100"
+                      alt=""
+                      srcset=""
+                    />
                     </div>
                   </div>
                 </div>
@@ -152,6 +156,7 @@
             <div class="card">
               <div class="card-header pb-0 p-3">
                 <h6 class="mb-2">All Windows Host</h6>
+                <button class="btn btn-outline-danger" onclick="PingWindowsNode()">Test Ping</button>
                 <button class="btn btn-danger" id="btnInstall" onclick="InstallWindowsExporter()">Install Windows-Exporter</button>
               </div>
               <div class="card-body">
@@ -161,6 +166,7 @@
                       <th scope="col">#</th>
                       <th scope="col">HOST</th>
                       <th scope="col">User</th>
+                      <th>Test</th>
                     </tr>
                   </thead>
                   <tbody id="tableBodyHost"></tbody>
@@ -178,6 +184,9 @@
               <div class="card-body" style="background-color: black;">
                <pre class="text-info" id="output"></pre>
               </div>
+              <div class="card-footer bg-secondary pb-0 p-3">
+                <button class="btn btn-light" onclick="clearConsole()">Clear</button>
+               </div>
             </div>
           </div>
         </div>
@@ -267,6 +276,26 @@
               },
               error: function (xhr, status, error) {
                 console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
+            });
+          }
+
+          function CurlExporter(ipaddress) {
+            //$('#btnInstall').attr('disabled',true)
+            $('#Console').focus()
+            $('#output').append('curl... ['+ipaddress+':9100] \n')
+            $.ajax({
+              url: "/CurlExporter",
+              method: "POST",
+              data:{ipaddr:ipaddress},
+              success: function (response) {
+                console.log(response);
+                $('#output').append(response)
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
               },
             });
           }
@@ -286,6 +315,10 @@
                 console.error(xhr.responseText);
               },
             });
+          }
+
+          function clearConsole(){
+            $('#output').empty();
           }
         </script>
         <%- include('../partials/footer') %>

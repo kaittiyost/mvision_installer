@@ -277,6 +277,7 @@ app.get('/InstallWindowsExporter',(req,res) => {
 
 
 app.post('/CurlExporter',(req,res) => {
+  
   const ipaddress = req.body.ipaddr;
   const os_type = req.body.os_type;
   let port = 9100;

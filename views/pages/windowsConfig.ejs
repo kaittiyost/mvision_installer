@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <%- include('../partials/head') %>
+
     <script>
       let jsonData = {};
       let dataLength = 0;
@@ -10,6 +11,7 @@
       let counter = 0;
 
       window.onload = function () {
+
         $.ajax({
           url: "/WindowsConfig/ReadFile",
           method: "GET",
@@ -180,7 +182,14 @@
           <div class="col-lg-12 mb-lg-0 mb-4">
             <div class="card">
               <div class="card-header pb-0 p-3 bg-dark">
-                <h6 class="mb-2 text-light font-weight-bold">Console</h6>
+                <div class="row">
+                  <div class="col-md-6" style="text-align: left;">
+                    <h6 class="mb-2 text-light font-weight-bold">Console</h6>
+                  </div>
+                  <div class="col-md-6" style="text-align: right;">
+                    <button class="btn btn-danger btn-sm" onclick="killProcess()">Kill</button>
+                  </div>
+                </div>
               </div>
               <div class="card-body" style="background-color: black;">
                <pre class="text-info" id="output"></pre>
@@ -191,7 +200,10 @@
             </div>
           </div>
         </div>
+        <script src="/socket.io/socket.io.js"></script>
         <script>
+          var socket = io();
+
           function addRow() {
             $("#table_body").append(
               `<tr id="row${row}">
@@ -285,11 +297,11 @@
           function CurlExporter(ipaddress) {
             //$('#btnInstall').attr('disabled',true)
             $('#Console').focus()
-            $('#output').append('curl... ['+ipaddress+':9100] \n')
+            $('#output').append('curl... ['+ipaddress+':9182] \n')
             $.ajax({
               url: "/CurlExporter",
               method: "POST",
-              data:{ipaddr:ipaddress},
+              data:{ipaddr:ipaddress,os_type:"windows"},
               success: function (response) {
                 console.log(response);
                 $('#output').append(response)
@@ -305,22 +317,22 @@
             $('#btnInstall').attr('disabled',true)
             $('#Console').focus()
             $('#output').append('Installing...')
-            $.ajax({
-              url: "/InstallWindowsExporter",
-              method: "GET",
-              success: function (response) {
-                console.log(response);
-                $('#output').append(response)
-              },
-              error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-              },
+            socket.emit('dataCMD', { cmd: 'ansible -m win_ping win -i $(pwd)/resources/inventory/windows_host.ini' });
+            socket.on('output', (data) => {
+                const output = document.getElementById('output');
+                output.innerHTML += data;
             });
+          }
+
+          function killProcess() {
+            socket.emit('killProcess');
+            $('#output').append('Process kill by user...')
           }
 
           function clearConsole(){
             $('#output').empty();
           }
+
         </script>
         <%- include('../partials/footer') %>
       </div>

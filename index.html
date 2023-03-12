@@ -1,0 +1,20 @@
+<!-- index.ejs -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Real-time ping output</title>
+  </head>
+  <body>
+    <h1>Real-time ping output:</h1>
+    <div id="output"></div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      socket.on('output', (data) => {
+        const output = document.getElementById('output');
+        output.innerHTML += data;
+      });
+    </script>
+  </body>
+</html>

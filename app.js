@@ -1,6 +1,6 @@
 const express = require('express')
-const app = express()
-const port = 3009
+//const app = express()
+const port = 3000
 const path = require("path")
 var fs = require('fs'); 
 
@@ -9,12 +9,58 @@ const nets = networkInterfaces();
 
 const subProcess = require('child_process')
 
+//-------------------------------------------------
+const { spawn } = require('child_process');
+const http = require('http');
+const Socket= require('socket.io');
+
+const app = express();
+
+var server = http.createServer(app).listen(3000, function(){
+  console.log("Express server listening on port " + 3000);
+});
+
+var io = Socket(server);
+
+//-------------------------------------------------
+
 app.set('view engine','ejs')
 
 let assetsDir = path.join(__dirname,"assets")
 app.use('/assets',express.static(assetsDir))
 
 app.use(express.urlencoded({ extended: true }))
+
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  var childProcess;
+// receive dynamic data from client
+  socket.on('dataCMD', (data) => {
+    var dataFromClient = [];
+    dataFromClient = data.cmd.split(" ");
+    console.log(dataFromClient.slice(1)); // remove data array index 0 for arg
+  
+    var arg = dataFromClient.slice(1)
+    childProcess = spawn(`${dataFromClient[0]}`, dataFromClient.slice(1));
+
+    childProcess.stdout.on('data', (data) => {
+      console.log(data.toString());
+      socket.emit('output', data.toString());
+    });
+  });
+
+  socket.on('killProcess', () => {
+    console.log('user killProcess');
+    childProcess.kill();
+  });
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+    //childProcess.kill();
+  });
+
+})
+
 
 app.get('/',(req,res) => {
   const results = Object.create(null);
@@ -31,7 +77,7 @@ app.get('/',(req,res) => {
         }
     }
   }
-  console.log(results);
+  //console.log(results);
   res.render('pages/index')
 })
 app.get('/linux',(req,res) => {
@@ -49,7 +95,7 @@ app.get('/prometheus',(req,res) => {
 })
 app.get('/LinuxConfig/ReadFile',(req,res) => {
   var inventory = fs.readFileSync('resources/inventory/linux_host.json','utf8'); 
-  console.log(inventory);
+  //console.log(inventory);
   let data ;
   if(inventory == ""){
     data = 'empty';
@@ -60,7 +106,7 @@ app.get('/LinuxConfig/ReadFile',(req,res) => {
 })
 app.get('/WindowsConfig/ReadFile',(req,res) => {
   var inventory = fs.readFileSync('resources/inventory/windows_host.json','utf8'); 
-  console.log(inventory);
+  //console.log(inventory);
   let data ;
   if(inventory == ""){
     data = 'empty';
@@ -229,10 +275,16 @@ app.get('/InstallWindowsExporter',(req,res) => {
 
 })
 
+
 app.post('/CurlExporter',(req,res) => {
   const ipaddress = req.body.ipaddr;
+  const os_type = req.body.os_type;
+  let port = 9100;
+  if(os_type =='windows'){
+    port = 9182;
+  }
   const cmd = `
-  curl http://${ipaddress}:9100/metrix \
+  curl http://${ipaddress}:${port}/metrics \
   `;
   var response;
   subProcess.exec(cmd, (err, stdout, stderr) => {
@@ -245,7 +297,6 @@ app.post('/CurlExporter',(req,res) => {
         res.status(200).send(response);
       }
     })
-
 })
 
 app.get('/login',(req,res) => {
@@ -287,6 +338,6 @@ var cmd = "curl -k -X  GET -H 'Accept:application/json' 'https://vcsa.sys2.local
     res.render('pages/vm')
 })
 
-app.listen(port, ()=>{
-    console.log(`App listening at localhost:${port}`);
-})
+// app.listen(port, ()=>{
+//   console.log(`App listening at localhost:${port}`);
+// })

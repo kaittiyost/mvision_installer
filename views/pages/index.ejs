@@ -12,16 +12,6 @@
     <div class="container-fluid py-4">
         <h6 class="text-white font-weight-bold">What do you want to monitor?</h6>
         <div class="row mt-4">
-            <div class="col-md-2 col-sm-6 mb-xl-0 mb-4" onclick="reDirect('/')">
-                <div class="card onmoursehover">
-                  <div class="card-body p-3">
-                    <div class="row">
-                      <img src="/assets/img/monitor/vsphere.png" alt="">
-                      <h6 class="text-center mt-2">Vsphere</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
             <div class="col-md-2 col-sm-6 mb-xl-0 mb-4" onclick="reDirect('/linux')">
                 <div class="card onmoursehover">
                   <div class="card-body p-3">
@@ -39,6 +29,16 @@
                           <img src="/assets/img/monitor/windows.png" alt="" srcset="" >
                           <h6 class="text-center mt-2">Windows OS</h6>
                       </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-2 col-sm-6 mb-xl-0 mb-4" onclick="reDirect('/')">
+                <div class="card onmoursehover">
+                  <div class="card-body p-3">
+                    <div class="row">
+                      <img src="/assets/img/monitor/vsphere.png" alt="">
+                      <h6 class="text-center mt-2">Vsphere</h6>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -77,24 +77,20 @@
                 </div>
               </div>
           </div>
-        <div class="row mt-4">
-            <div class="col-lg-12 mb-lg-0 mb-4">
-              <div class="card z-index-2 h-100">
-                <div class="card-header pb-0 pt-3 bg-transparent">
-                  <h6 class="text-capitalize">Sales overview</h6>
-                  <p class="text-sm mb-0">
-                    <i class="fa fa-arrow-up text-success"></i>
-                    <span class="font-weight-bold">4% more</span> in 2021
-                  </p>
-                </div>
-                <div class="card-body p-3">
-                  <div class="chart">
-                    <canvas id="chart-line" class="chart-canvas" height="300"></canvas>
+          <h6 class="text-white font-weight-bold">Dashboard</h6>
+          <div class="row mt-4">
+            <div class="col-md-2 col-sm-6 mb-xl-0 mb-4" onclick="reDirect('/prometheus')">
+                <div class="card onmoursehover">
+                  <div class="card-body p-3">
+                    <div class="row">
+                      <img src="/assets/img/monitor/grafana.png" alt="">
+                      <h6 class="text-center mt-2">Grafana</h6>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
           </div>
+ 
           <script src="/socket.io/socket.io.js"></script>
           <script>
             const socket = io();

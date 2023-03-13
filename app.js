@@ -210,10 +210,29 @@ app.post('/WindowsConfig/SaveFile',(req,res) => {
 })
 
 app.post('/PrometheusConfig/SaveFile',(req,res) => {
+  //let statusYML = 0;
+  //let statusJSON = 0;
   let new_job = req.body.text 
-  let new_job_obj = req.body.text_obj
+  let new_job_obj = req.body.tempData
   console.log(jsonPromData);
   console.log(new_job_obj);
+  console.log('length : '+jsonPromData.collector.length);
+  jsonPromData.collector[jsonPromData.collector.length] = new_job_obj;
+  console.log(JSON.stringify(jsonPromData));
+
+  // Save .json
+  var oldData = fs.readFileSync('prometheus/prometheus.json','utf8'); 
+  console.log('####################################');
+  let oldDataPrepare = JSON.parse(oldData);
+  oldDataPrepare = JSON.stringify(jsonPromData);
+  console.log(oldDataPrepare);
+
+  fs.writeFile(__dirname+'/prometheus/prometheus.json', JSON.stringify(jsonPromData) , function (err) {
+    if (err) throw err;
+    console.log('New text appended to file Prom.yml!');
+    statusJSON = 1;
+  });
+
   // try {
   //   fs.writeFile(__dirname+'/resources/inventory/windows_host.json',JSON.stringify(req.body.text_json), function (err) {
   //     if (err) throw err;
@@ -229,9 +248,27 @@ app.post('/PrometheusConfig/SaveFile',(req,res) => {
   //   console.log(error);
   // }
 
+  // Write .yml
   fs.appendFile(__dirname+'/prometheus/prometheus.yml', new_job , function (err) {
     if (err) throw err;
     console.log('New text appended to file Prom.yml!');
+    statusYML = 1;
+  });
+
+  // console.log('statusJSON :'+statusJSON);
+  // console.log('statusYML :'+statusYML);
+
+  res.status(200).send('ok')
+
+})
+
+app.post('/PrometheusConfig/EnSaveFile',(req,res) => {
+  let new_cfg = req.body.cfg 
+  console.log(new_cfg);
+  fs.writeFile(__dirname+'/prometheus/prometheus.yml', new_cfg.toString() , function (err) {
+    if (err) throw err;
+    console.log('New text saved to file Prom.yml!');
+    res.status(200).send('ok')
   });
 })
 
@@ -324,6 +361,25 @@ app.post('/CurlExporter',(req,res) => {
   `;
   var response;
   subProcess.exec(cmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err)
+        res.status(500).send(stderr);
+      } else {
+        response = stdout
+        console.log(response);
+        res.status(200).send(response);
+      }
+    })
+})
+
+app.post('/DockerRun',(req,res) => {
+  const container_name = req.body.container_name;
+  let cmd = "";
+  if(container_name == "prometheus"){
+    cmd = 'docker run -d --name prometheus  -p 9090:9090 -v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus ';
+  }
+  var response;
+    subProcess.exec(cmd, (err, stdout, stderr) => {
       if (err) {
         console.error(err)
         res.status(500).send(stderr);

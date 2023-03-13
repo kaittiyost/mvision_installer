@@ -11,7 +11,7 @@
 
       var targets_arr = [];
       window.onload = function () {
-        $('#btn_add_host').attr('disabled',true)
+        $('#btnAction').attr('disabled',true)
         $.ajax({
           url: "/PrometheusConfig/ReadFile",
           method: "GET",
@@ -66,30 +66,47 @@
               <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
                   <div class="row">
-                    <div class="col-4">
-                      <img
+                    <div class=" col-1">
+                      <a class="btn btn-icon-only btn-rounded btn-outline-dark mb-0 me-3 btn-md d-flex align-items-center justify-content-center" href="/"><i class="ni ni-bold-left" aria-hidden="true"></i></a> 
+                    </div>
+                    <div class="col-3 p-2">
+                    
+                        <img
                         src="/assets/img/monitor/prometheus.png"
                         width="100"
                         alt=""
                         srcset=""
                       />
+               
                       
                     </div>
-                    <div class="col-8">
-                      <button class="btn btn-danger btn-sm ms-auto" onclick="RunPrometheusOnDocker()">
-                        Run Prometheus
-                      </button>
-                      <p>Support : prometheus tsdb</p>
-                      
-                      <button class="btn btn-primary btn-sm ms-auto" onclick="ReadFileYML()">
-                        Engineer mode
-                      </button>
+                    <div class=" col-8">
+                      <h4>Prometheus Config</h4>
+                      Support : Node-Exporter, Windows-Exporter, VMWare-Exporter
+                      <br>
+                      <a href="#" onclick="ReadFileYML()">
+                        <i class="ni ni-bold-right" aria-hidden="true"></i> Open Engineer Mode
+                      </a>
                     </div>
                   </div>
-                  <div id="GroupNameShow"></div>
                 </div>
               </div>
               <hr />
+              <div class="p-3">
+               <div class="row">
+                <div id="GroupNameShow"></div>
+                <div class="col col-md-2">
+                  <b>Choose Collector</b>
+                </div>
+                <div class="col col-md-10">
+                  <select class="form-select" style="width: 30%;" id="collectorList" onchange="addRow()">
+                    <option selected>Collector</option>
+                    <option value="linux">Linux_host</option>
+                    <option value="windows">Windows_host</option>
+                  </select>
+                </div>
+               </div>
+              </div>
               <div class="table-responsive p-3">
                 <table class="table align-items-center">
                   <thead>
@@ -100,20 +117,6 @@
                     </tr>
                   </thead>
                   <tbody id="table_body">
-                    <!-- <tr id="row0">
-                    <td id="row0col0">
-                        <input type="text" id="input_row0col0" class="form-control">
-                    </td>
-                    <td id="row0col1">
-                        <input type="text" id="input_row0col1" class="form-control">
-                    </td>
-                    <td id="row0col2">
-                        <input type="text" class="form-control" disabled value="ssh">
-                    </td>
-                    <td id="row0col3">
-                        <a class="btn btn-link text-danger text-gradient px-3 mb-0" href="javascript:;"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
-                    </td>
-                  </tr> -->
                   </tbody>
                 </table>
               </div>
@@ -122,22 +125,30 @@
                 <button class="btn btn-success btn-sm ms-auto" onclick="saveFile()" id="btnAction">
                   Save
                 </button>
-                <button
+                <!-- <button
                   class="btn btn-primary btn-sm ms-auto"
                   onclick="addRow()"
                   id="btn_add_host"
                 >
-                  Add Host
-                </button>
-               
+                  Add Collector
+                </button> -->               
               </center>
             </div>
           </div>
           <div class="col-lg-5 mb-lg-0 mb-4">
             <div class="card">
               <div class="card-header pb-0 p-3">
-                <h6 class="mb-2">Job</h6>
-                <button class="btn btn-danger" id="btnInstall" onclick="RestartContainer('prometheus')">Restart Prometheus</button>
+                <h6 class="mb-2">Job Name on Prometheus.</h6>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    ACTIONS
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" onclick="RunPrometheusOnDocker('prometheus')" href="#">Run Prometheus</a></li>
+                    <li><a class="dropdown-item" id="btnInstall" onclick="RestartContainer('prometheus')" href="#">Restart Prometheus</a></li>
+                  </ul>
+                </div>
+                
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newGroupModal">
                   New Group
                 </button>
@@ -213,7 +224,7 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="createNewGroup()">Save</button>
+                <button type="button" class="btn btn-primary" onclick="saveFileEnMode()" >Save</button>
               </div>
             </div>
           </div>
@@ -221,17 +232,34 @@
         <script src="/socket.io/socket.io.js"></script>
         <script>
           var socket = io();
-          function RunPrometheusOnDocker() {
-            $('#btnInstall').attr('disabled',true)
-            $('#Console').focus()
-            $('#output').append('Installing...')
-            const command='docker run --name prometheus  -p 9090:9090 -v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus ';
-            socket.emit('dataCMD', { cmd: command});
-            socket.on('output', (data) => {
-                const output = document.getElementById('output');
-                output.innerHTML += data;
+          // function RunPrometheusOnDocker() {
+          //   $('#btnInstall').attr('disabled',true)
+          //   $('#Console').focus()
+          //   $('#output').append('Installing...')
+          //   const command='docker run -d --name prometheus  -p 9090:9090 -v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus ';
+          //   socket.emit('dataCMD', { cmd: command});
+          //   socket.on('output', (data) => {
+          //       const output = document.getElementById('output');
+          //       output.innerHTML += data;
+          //   });
+          // }
+
+          function RunPrometheusOnDocker(container_name) {
+            $.ajax({
+              url: "/DockerRun",
+              method: "POST",
+              data:{container_name : container_name},
+              success: function (response) {
+                console.log(response);
+                $('#output').append(response)
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
             });
           }
+
 
           function createNewGroup(){
             
@@ -255,31 +283,95 @@
 
           function configTarget(group_name){
             $('#table_body').empty()
-            $('#btn_add_host').attr('disabled',false)
-            $('#GroupNameShow').html(group_name)
+            $('#btnAction').attr('disabled',false)
+            $('#GroupNameShow').html('You are creating a group : '+group_name)
             $('#job_name_current').val(group_name)
-            console.log(targets_arr);
+            // console.log(targets_arr);
           }
 
           function addRow() {
-            $("#table_body").append(
-              `<tr id="row${row}">
-                    <td id="row${row}col0">
-                        <input type="text" id="input_row${row}col0" class="form-control">
-                    </td>
-                    <td id="row${row}col1">
-                        <input type="text" id="input_row${row}col1" class="form-control">
-                    </td>
-                    <td id="row${row}col3">
-                        <a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${row})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
-                    </td>
-                </tr>`
-            );
-            row++;
-            counter++;
-            console.log("counter =" + counter);
+            let collectorList = $('#collectorList').val();
+            let path = "";
+            let port = 0;
+            if(collectorList == "linux"){
+              path = "/LinuxConfig/ReadFile"
+              port = 9100;
+            }else if(collectorList == "windows"){
+              path = "/WindowsConfig/ReadFile"
+              port = 9182;
+            }
+            $.ajax({
+              url: path,
+              method: "GET",
+              data: { type: "linux" },
+              success: function (response) {
+                if (response == "empty") {
+                  $("#tableHost").html("Host net set.");
+                  $("#btnAction").attr("onclick", "saveFile()");
+                } else {
+                  const toJson = JSON.parse(response);
+                  
+                  dataLength = Object.keys(toJson).length;
+                  
+                  $("#table_body").empty()
+                  for (i = 0; i < Object.keys(toJson).length; i++) {
+                    let key_array = [];
+                    key_array.push(toJson[`row${i}`][0]);
+                    key_array.push(toJson[`row${i}`][1]);
+
+                    console.log('key_array :'+key_array);
+
+                    jsonData[`row${i}`] = key_array;
+
+                    row++;counter++;
+                    $("#table_body").append(
+                      `<tr id="row${i}">
+                                <td id="row${i}col0">
+                                    <input type="text" id="input_row${i}col0" class="form-control" value="${
+                        JSON.parse(response)[`row${i}`][0]
+                      }">
+                                </td>
+                                <td id="row${i}col1">
+                                    <input type="text" id="input_row${i}col1" class="form-control" value="${
+                       port
+                      }">
+                                </td>
+                                <td id="row${i}col3">
+                                    <a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${row})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
+                                </td>
+                            </tr>`
+                    );
+                    $("#btnAction").attr("onclick", "saveFile()");
+                  }
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
           }
 
+          function saveFileEnMode() {
+
+            let config = $('#text_editor').val()
+            console.log(config);
+            $.ajax({
+              url: "/PrometheusConfig/EnSaveFile",
+              method: "POST",
+              data: { cfg: config },
+              success: function (response) {
+                if (response == "ok") {
+                  $('#EngineerMode').modal('hide')
+                  alert("Saved.");
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
+
+          var tempData = {}; // For remove '' becourse "'10.4.160.xx'"
           function saveFile() {
             let new_job ;
             let job_name = $('#job_name_current').val()
@@ -289,12 +381,19 @@
                 jsonData = {};
             } else {
               let key_array = [];
+              let key_array_temp = [];
               for (c = 0; c <= counter; c++) {
                 if ($(`#input_row${c}col${0}`).val() === undefined) {
                 } else {
                   let host  = "'"+$(`#input_row${c}col${0}`).val()+":";
                   let port = $(`#input_row${c}col${1}`).val()+"'";
+
+                  // for write json file
+                  let hostjson  = $(`#input_row${c}col${0}`).val()+":";
+                  let portjson = $(`#input_row${c}col${1}`).val();
+
                   key_array.push(`${host+port}`);
+                  key_array_temp.push(`${hostjson+portjson}`);
                   console.log(key_array);
                   new_job = ` 
                   \n
@@ -305,21 +404,25 @@
 
                   jsonData['job_name'] = job_name;
                   jsonData['targets'] = key_array;
+
+                  tempData['job_name'] = job_name;
+                  tempData['targets'] = key_array_temp;
+
                   $('#output').append(jsonData);
      
                 }
               }
             }
-            console.log(new_job);
-            console.log(jsonData); //obj
+            //console.log(new_job);
+            //console.log(jsonData); //obj
 
             $.ajax({
               url: "/PrometheusConfig/SaveFile",
               method: "POST",
-              data: { text: new_job , text_obj:jsonData },
+              data: { text: new_job , text_obj:jsonData , tempData : tempData},
               success: function (response) {
                 if (response == "ok") {
-                  alert("Prom host is ready.");
+                  alert("Ok");
                 }
               },
               error: function (xhr, status, error) {
@@ -327,6 +430,7 @@
               },
             });
           }
+
 
           function removeRow(row){
             console.log('removeRow '+row);

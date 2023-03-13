@@ -317,7 +317,7 @@
             $('#btnInstall').attr('disabled',true)
             $('#Console').focus()
             $('#output').append('Installing...')
-            const command='ansible-playbook ./resources/playbook/install-windows-exporter.yml -i ./resources/inventory/windows_host.ini';
+            const command='ansible-playbook ./resources/install-windows-exporter.yml -i ./resources/inventory/windows_host.ini';
             socket.emit('dataCMD', { cmd: command});
             socket.on('output', (data) => {
                 const output = document.getElementById('output');

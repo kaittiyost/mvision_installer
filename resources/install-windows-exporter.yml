@@ -4,7 +4,7 @@
   tasks:
     - name: Copy ==> windows-exporter.tar file
       copy:
-        src: ./windows_exporter_amd64.msi
+        src: ./windows_exporter-amd64.msi
         dest: C:\Windows\Temp
 
     - name: Install package

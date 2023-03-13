@@ -4,12 +4,12 @@
 
     - name: Copy ==> node-exporter.tar file
       copy:
-        src: /resources/node_exporter-linux-amd64.tar.gz
+        src: ./node_exporter-linux-amd64.tar.gz
         dest: /tmp
 
     - name: Extract Node Exporter
       unarchive:
-        src: /tmp/node_exporter_linux-amd64.tar.gz
+        src: /tmp/node_exporter-linux-amd64.tar.gz
         dest: /usr/local/bin/
         remote_src: yes
         extra_opts: --strip-components=1
@@ -22,7 +22,7 @@
 
     - name: Copy ==> node-exporter.service file
       copy:
-        src: /resources/node_exporter.service
+        src: ./node_exporter.service
         dest: /etc/systemd/system/
 
     - name: Run daemon reload command

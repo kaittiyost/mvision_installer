@@ -73,10 +73,14 @@
                         alt=""
                         srcset=""
                       />
+                      
                     </div>
                     <div class="col-8">
-                      <h6 class="mb-2">Prometheus Job</h6>
+                      <button class="btn btn-danger btn-sm ms-auto" onclick="RunPrometheusOnDocker()">
+                        Run Prometheus
+                      </button>
                       <p>Support : prometheus tsdb</p>
+                      
                       <button class="btn btn-primary btn-sm ms-auto" onclick="ReadFileYML()">
                         Engineer mode
                       </button>
@@ -214,7 +218,20 @@
             </div>
           </div>
         </div>
+        <script src="/socket.io/socket.io.js"></script>
         <script>
+          var socket = io();
+          function RunPrometheusOnDocker() {
+            $('#btnInstall').attr('disabled',true)
+            $('#Console').focus()
+            $('#output').append('Installing...')
+            const command='docker run --name prometheus  -p 9090:9090 -v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus ';
+            socket.emit('dataCMD', { cmd: command});
+            socket.on('output', (data) => {
+                const output = document.getElementById('output');
+                output.innerHTML += data;
+            });
+          }
 
           function createNewGroup(){
             
@@ -320,23 +337,6 @@
             console.log(jsonData);
           }
 
-
-          function InstallWindowsExporter() {
-            $('#btnInstall').attr('disabled',true)
-            $('#Console').focus()
-            $('#output').append('Installing...')
-            $.ajax({
-              url: "/InstallWindowsExporter",
-              method: "GET",
-              success: function (response) {
-                console.log(response);
-                $('#output').append(response)
-              },
-              error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-              },
-            });
-          }
 
           function ReadFileByName(JobName,index){
               $('#btn_add_host').attr('disabled',true)

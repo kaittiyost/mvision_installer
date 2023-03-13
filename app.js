@@ -15,7 +15,7 @@ const http = require('http');
 const Socket= require('socket.io');
 
 const app = express();
-
+let jsonPromData = require('./prometheus/prometheus.json'); 
 var server = http.createServer(app).listen(3000, function(){
   console.log("Express server listening on port " + 3000);
 });
@@ -115,14 +115,41 @@ app.get('/WindowsConfig/ReadFile',(req,res) => {
   }
   res.status(200).send(data);
 })
-app.get('/PrometheusConfig/ReadFile',(req,res) => {
-  var inventory = fs.readFileSync('resources/inventory/windows_host.json','utf8'); 
+app.get('/PrometheusConfig/ReadFileYML',(req,res) => {
+  var inventory = fs.readFileSync('prometheus/prometheus.yml','utf8'); 
   console.log(inventory);
   let data ;
   if(inventory == ""){
     data = 'empty';
   }else{
     data = inventory;
+  }
+  res.status(200).send(data);
+})
+app.get('/PrometheusConfig/ReadFile',(req,res) => {
+  var inventory = fs.readFileSync('prometheus/prometheus.json','utf8'); 
+  console.log(inventory);
+  let data ;
+  if(inventory == ""){
+    data = 'empty';
+  }else{
+    data = inventory;
+  }
+  res.status(200).send(data);
+})
+app.post('/PrometheusConfig/ReadFileByName',(req,res) => {
+  const job_index = req.body.job_index;
+  var inventory = fs.readFileSync('prometheus/prometheus.json','utf8'); 
+  let targets_json = JSON.parse(inventory); 
+  console.log(job_index);
+  console.log(targets_json);
+  console.log(targets_json.collector[job_index]);
+  
+  let data ;
+  if(inventory == ""){
+    data = 'empty';
+  }else{
+    data = targets_json.collector[job_index];
   }
   res.status(200).send(data);
 })
@@ -183,20 +210,29 @@ app.post('/WindowsConfig/SaveFile',(req,res) => {
 })
 
 app.post('/PrometheusConfig/SaveFile',(req,res) => {
-  try {
-    fs.writeFile(__dirname+'/resources/inventory/windows_host.json',JSON.stringify(req.body.text_json), function (err) {
-      if (err) throw err;
-      console.log('Host json has been saved!');
-    });
-    let sumtext = req.body.text 
-    fs.writeFile(__dirname+'/resources/inventory/windows_host.ini', sumtext, function (err) {
-      if (err) throw err;
-      console.log('File has been saved!');
-      res.status(200).send('ok');
-    });
-  } catch (error) {
-    console.log(error);
-  }
+  let new_job = req.body.text 
+  let new_job_obj = req.body.text_obj
+  console.log(jsonPromData);
+  console.log(new_job_obj);
+  // try {
+  //   fs.writeFile(__dirname+'/resources/inventory/windows_host.json',JSON.stringify(req.body.text_json), function (err) {
+  //     if (err) throw err;
+  //     console.log('Host json has been saved!');
+  //   });
+  //   let sumtext = req.body.text 
+  //   fs.writeFile(__dirname+'/resources/inventory/windows_host.ini', sumtext, function (err) {
+  //     if (err) throw err;
+  //     console.log('File has been saved!');
+  //     res.status(200).send('ok');
+  //   });
+  // } catch (error) {
+  //   console.log(error);
+  // }
+
+  fs.appendFile(__dirname+'/prometheus/prometheus.yml', new_job , function (err) {
+    if (err) throw err;
+    console.log('New text appended to file Prom.yml!');
+  });
 })
 
 app.get('/PingLinuxNode',(req,res) => {
@@ -214,7 +250,6 @@ app.get('/PingLinuxNode',(req,res) => {
         res.status(200).send(response);
       }
     })
-
 })
 
 app.get('/PingWindowsNode',(req,res) => {
@@ -277,7 +312,7 @@ app.get('/InstallWindowsExporter',(req,res) => {
 
 
 app.post('/CurlExporter',(req,res) => {
-  
+
   const ipaddress = req.body.ipaddr;
   const os_type = req.body.os_type;
   let port = 9100;
@@ -289,6 +324,24 @@ app.post('/CurlExporter',(req,res) => {
   `;
   var response;
   subProcess.exec(cmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err)
+        res.status(500).send(stderr);
+      } else {
+        response = stdout
+        console.log(response);
+        res.status(200).send(response);
+      }
+    })
+})
+
+app.post('/DockerRestart',(req,res) => {
+  const container_name = req.body.container_name;
+  const cmd = `
+  docker restart ${container_name}
+  `;
+  var response;
+    subProcess.exec(cmd, (err, stdout, stderr) => {
       if (err) {
         console.error(err)
         res.status(500).send(stderr);

@@ -184,7 +184,10 @@
             </div>
           </div>
         </div>
+        <script src="/socket.io/socket.io.js"></script>
         <script>
+          var socket = io();
+
           function addRow() {
             $("#table_body").append(
               `<tr id="row${row}">
@@ -254,11 +257,10 @@
             console.log(jsonData);
           }
 
-
           function PingLinuxNode() {
             //$('#btnInstall').attr('disabled',true)
             $('#Console').focus()
-            $('#output').append("[Test Ping] \n")
+            $('#output').append("Test Ping ... \n")
             $.ajax({
               url: "/PingLinuxNode",
               method: "GET",
@@ -273,22 +275,18 @@
             });
           }
 
-          function InstallNodeExporter() {
+          function InstallWindowsExporter() {
             $('#btnInstall').attr('disabled',true)
             $('#Console').focus()
             $('#output').append('Installing...')
-            $.ajax({
-              url: "/InstallNodeExporter",
-              method: "GET",
-              success: function (response) {
-                console.log(response);
-                $('#output').append(response)
-              },
-              error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-              },
+            const command='ansible-playbook ./resources/playbook/install-node-exporter.yml -i ./resources/inventory/linux_host.ini';
+            socket.emit('dataCMD', { cmd: command});
+            socket.on('output', (data) => {
+                const output = document.getElementById('output');
+                output.innerHTML += data;
             });
           }
+
 
           function CurlExporter(ipaddress) {
             //$('#btnInstall').attr('disabled',true)
@@ -297,7 +295,7 @@
             $.ajax({
               url: "/CurlExporter",
               method: "POST",
-              data:{ipaddr:ipaddress},
+              data:{ipaddr:ipaddress,os_type:'linux'},
               success: function (response) {
                 console.log(response);
                 $('#output').append(response)

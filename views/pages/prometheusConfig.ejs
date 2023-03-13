@@ -9,21 +9,21 @@
       var row = 0;
       let counter = 0;
 
+      var targets_arr = [];
       window.onload = function () {
+        $('#btn_add_host').attr('disabled',true)
         $.ajax({
           url: "/PrometheusConfig/ReadFile",
           method: "GET",
-          data: { type: "linux" },
           success: function (response) {
             if (response == "empty") {
               $("#tableHost").html("Host net set.");
               $("#btnAction").attr("onclick", "saveFile()");
             } else {
               const toJson = JSON.parse(response);
-              console.log(toJson);
-              dataLength = Object.keys(toJson).length;
-              console.log(dataLength);
-              for (i = 0; i < Object.keys(toJson).length; i++) {
+              console.log(toJson.collector.length);
+              
+              for (i = 0; i < toJson.collector.length; i++) {
                 // let key_array = [];
                 // key_array.push(toJson[`row${i}`][0]);
                 // key_array.push(toJson[`row${i}`][1]);
@@ -31,27 +31,18 @@
                 // console.log('key_array :'+key_array);
 
                 // jsonData[`row${i}`] = key_array;
-
+                targets_arr = toJson.collector[i].targets;
                 $("#tableBodyHost").append(
                   `
                         <tr>
                             <th scope="row">${i + 1}</th>
-                            <td>${toJson.job.target}</td>
-                            <td>${toJson.job.target}</td>
+                            <td>${toJson.collector[i].job_name}</td>
+                            <td> <button class="btn btn-primary" onclick="ReadFileByName('${toJson.collector[i].job_name}',${i})">View</button></td>
                         </tr>
                         `
                 );
                 row++;counter++;
-                $("#table_body").append(
-                  `<tr id="row${i}">
-                            <td id="row${i}col0">
-                                ${toJson.job}
-                            </td>
-                            <td id="row${i}col3">
-                                <a class="btn btn-link text-danger text-gradient px-3 mb-0"  href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>view</a>
-                            </td>
-                        </tr>`
-                );
+
                 $("#btnAction").attr("onclick", "saveFile()");
               }
             }
@@ -86,8 +77,12 @@
                     <div class="col-8">
                       <h6 class="mb-2">Prometheus Job</h6>
                       <p>Support : prometheus tsdb</p>
+                      <button class="btn btn-primary btn-sm ms-auto" onclick="ReadFileYML()">
+                        Engineer mode
+                      </button>
                     </div>
                   </div>
+                  <div id="GroupNameShow"></div>
                 </div>
               </div>
               <hr />
@@ -95,7 +90,8 @@
                 <table class="table align-items-center">
                   <thead>
                     <tr>
-                      <th>Job Name</th>
+                      <th>Targets Host</th>
+                      <th>Targets Port</th>
                       <th>Action</th>
                     </tr>
                   </thead>
@@ -118,15 +114,18 @@
                 </table>
               </div>
               <center>
-                <button class="btn btn-success btn-sm ms-auto" id="btnAction">
+                <input type="hidden" id="job_name_current" >
+                <button class="btn btn-success btn-sm ms-auto" onclick="saveFile()" id="btnAction">
                   Save
                 </button>
                 <button
                   class="btn btn-primary btn-sm ms-auto"
                   onclick="addRow()"
+                  id="btn_add_host"
                 >
-                  New Job
+                  Add Host
                 </button>
+               
               </center>
             </div>
           </div>
@@ -134,15 +133,18 @@
             <div class="card">
               <div class="card-header pb-0 p-3">
                 <h6 class="mb-2">Job</h6>
-                <button class="btn btn-danger" id="btnInstall" onclick="InstallWindowsExporter()">Install Windows-Exporter</button>
+                <button class="btn btn-danger" id="btnInstall" onclick="RestartContainer('prometheus')">Restart Prometheus</button>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newGroupModal">
+                  New Group
+                </button>
               </div>
               <div class="card-body">
-                <table class="table table-striped table-hover" id="tableHost">
+                <table class="table table-striped table-hover" id="tableGroup">
                   <thead>
                     <tr>
                       <th scope="col">#</th>
-                      <th scope="col">HOST</th>
-                      <th scope="col">User</th>
+                      <th scope="col">Group</th>
+                      <th scope="col">Action</th>
                     </tr>
                   </thead>
                   <tbody id="tableBodyHost"></tbody>
@@ -163,7 +165,85 @@
             </div>
           </div>
         </div>
+        <!-- Modal -->
+        <div class="modal fade" id="newGroupModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Create new Group</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="p-3">
+                  <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                      <label for="job_name" class="col-form-label">Group name : </label>
+                    </div>
+                    <div class="col-md">
+                      <input type="text" id="new_group_name" class="form-control">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="createNewGroup()">Create</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal modal-dialog modal-lg fade" id="EngineerMode" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Engineer Mode</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="p-3">
+                  <div class="row g-3 align-items-center">
+                   <textarea class="form-control text-success" style="background-color: black;" name="" id="text_editor" cols="30" rows="10"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="createNewGroup()">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
         <script>
+
+          function createNewGroup(){
+            
+            let counter = 1;
+            $("#tableGroup").append(
+              `<tr>
+                    <td>
+                        ${counter}
+                    </td>
+                    <td>
+                        ${$('#new_group_name').val()}
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" onclick="configTarget('${$('#new_group_name').val()}')">Config</button>
+                    </td>
+                </tr>`
+            );
+            counter++;
+            $('#newGroupModal').modal('hide')
+          }
+
+          function configTarget(group_name){
+            $('#table_body').empty()
+            $('#btn_add_host').attr('disabled',false)
+            $('#GroupNameShow').html(group_name)
+            $('#job_name_current').val(group_name)
+            console.log(targets_arr);
+          }
+
           function addRow() {
             $("#table_body").append(
               `<tr id="row${row}">
@@ -172,12 +252,6 @@
                     </td>
                     <td id="row${row}col1">
                         <input type="text" id="input_row${row}col1" class="form-control">
-                    </td>
-                    <td id="row${row}col1">
-                        <input type="password" id="input_row${row}col2" class="form-control">
-                    </td>
-                    <td id="row${row}col2">
-                        <input type="text" class="form-control" disabled value="winrm">
                     </td>
                     <td id="row${row}col3">
                         <a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${row})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
@@ -190,35 +264,45 @@
           }
 
           function saveFile() {
-            let text = "[win] \n";
+            let new_job ;
+            let job_name = $('#job_name_current').val()
             console.log("row = " + row);
             console.log("connter = " + counter);
             if (row == 0) {
-                jsonData = 0;
+                jsonData = {};
             } else {
+              let key_array = [];
               for (c = 0; c <= counter; c++) {
                 if ($(`#input_row${c}col${0}`).val() === undefined) {
                 } else {
-                  let key_array = [];
-                  key_array.push($(`#input_row${c}col${0}`).val());
-                  key_array.push($(`#input_row${c}col${1}`).val());
-                  key_array.push($(`#input_row${c}col${2}`).val());
-                  jsonData[`row${c}`] = key_array;
-                  text += `${$(`#input_row${c}col${0}`).val()} ansible_user=${$(`#input_row${c}col${1}`).val()} ansible_password=${$(
-                    `#input_row${c}col${2}`
-                  ).val()} \n`;
+                  let host  = "'"+$(`#input_row${c}col${0}`).val()+":";
+                  let port = $(`#input_row${c}col${1}`).val()+"'";
+                  key_array.push(`${host+port}`);
+                  console.log(key_array);
+                  new_job = ` 
+                  \n
+  - job_name: ${job_name} 
+    scrape_interval: 5s
+    static_configs:
+      - targets: [${key_array}]`;
+
+                  jsonData['job_name'] = job_name;
+                  jsonData['targets'] = key_array;
+                  $('#output').append(jsonData);
+     
                 }
               }
             }
-            //console.log(text);
+            console.log(new_job);
+            console.log(jsonData); //obj
 
             $.ajax({
-              url: "/WindowsConfig/SaveFile",
+              url: "/PrometheusConfig/SaveFile",
               method: "POST",
-              data: { text: text, text_json: jsonData },
+              data: { text: new_job , text_obj:jsonData },
               success: function (response) {
                 if (response == "ok") {
-                  alert("Windows host is ready.");
+                  alert("Prom host is ready.");
                 }
               },
               error: function (xhr, status, error) {
@@ -253,6 +337,86 @@
               },
             });
           }
+
+          function ReadFileByName(JobName,index){
+              $('#btn_add_host').attr('disabled',true)
+              $('#btnAction').attr('disabled',true)
+              $.ajax({
+                url: "/PrometheusConfig/ReadFileByName",
+                data:{job_index:index},
+                method: "POST",
+                success: function (response) {
+                  if (response == "empty") {
+                     //$("#tableHost").html("Host net set.");
+                     //$("#btnAction").attr("onclick", "saveFile()");
+                  } else {
+                    const prepareJson = JSON.stringify(response);
+                    const toJson = JSON.parse(prepareJson)
+                    //console.log(JSON.parse(toJson));
+                   
+                    for (i = 0; i < toJson.targets.length; i++) {
+                      const host_ip = toJson.targets[i].split(":")[0];
+                      const port = toJson.targets[i].split(":")[1];
+                      $("#table_body").append(
+                          `<tr id="row${i}">
+                                <td id="row${i}col0">
+                                    <input type="text" id="input_row${i}col0" class="form-control" value="${host_ip}">
+                                </td>
+                                <td id="row${i}col1">
+                                    <input type="text" id="input_row${i}col1" class="form-control" value="${port}">
+                                </td>
+                                <td id="row${i}col3">
+                                    <a class="btn btn-link text-danger text-gradient px-3 mb-0"  href="#">Curl</a>
+                                </td>
+                            </tr>`
+                        );
+                    }
+                  }
+                },
+                error: function (xhr, status, error) {
+                  console.error(xhr.responseText);
+                },
+              });
+          }
+
+          function ReadFileYML(){
+              $.ajax({
+                url: "/PrometheusConfig/ReadFileYML",
+                method: "GET",
+                success: function (response) {
+                  console.log(response);
+                  if (response == "empty") {
+
+                  } else {
+                    console.log(response);
+                    $('textarea#text_editor').val(response)
+                  }
+                },
+                error: function (xhr, status, error) {
+                  console.error(xhr.responseText);
+                },
+              });
+
+              $('#EngineerMode').modal('show')
+          }
+        
+          function RestartContainer(container_name) {
+            
+            $.ajax({
+              url: "/DockerRestart",
+              method: "POST",
+              data:{container_name : container_name},
+              success: function (response) {
+                console.log(response);
+                $('#output').append(response)
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
+            });
+          }
+
         </script>
         <%- include('../partials/footer') %>
       </div>

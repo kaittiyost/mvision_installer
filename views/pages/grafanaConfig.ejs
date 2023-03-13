@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('../partials/head') %>
+    <script>
+
+      window.onload = function () {
+        $('#btnAction').attr('disabled',true)
+        $.ajax({
+          url: "/PrometheusConfig/ReadFile",
+          method: "GET",
+          success: function (response) {
+            if (response == "empty") {
+              
+            } else {
+              
+            }
+          },
+          error: function (xhr, status, error) {
+            console.error(xhr.responseText);
+          },
+        });
+      };
+    </script>
+  </head>
+  <body class="g-sidenav-show bg-gray-100">
+    <div class="min-height-300 bg-dark position-absolute w-100"></div>
+    <%- include('../partials/sidebar') %>
+    <main class="main-content position-relative border-radius-lg">
+      <%- include('../partials/nav') %>
+      <div class="container-fluid py-4">
+        <div class="row mt-4">
+          <div class="col-lg-7 mb-lg-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0 p-3">
+                <div class="d-flex justify-content-between">
+                  <div class="row">
+                    <div class=" col-1">
+                      <a class="btn btn-icon-only btn-rounded btn-outline-dark mb-0 me-3 btn-md d-flex align-items-center justify-content-center" href="/"><i class="ni ni-bold-left" aria-hidden="true"></i></a> 
+                    </div>
+                    <div class="col-3 p-2">
+                    
+                        <img
+                        src="/assets/img/monitor/grafana.png"
+                        width="100"
+                        alt=""
+                        srcset=""
+                      />
+               
+                      
+                    </div>
+                    <div class=" col-8">
+                      <h4>Grafana Dashboard Config</h4>
+                      Version : Build for Mvision.
+                      <br>
+                      <a href="#" onclick="ReadFileYML()">
+                        <i class="ni ni-bold-right" aria-hidden="true"></i> Open Engineer Mode
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <hr />
+              <div class="p-3">
+               <div class="row">
+                <div id="GroupNameShow"></div>
+                <div class="col col-md-2">
+                  <b>Choose Collector</b>
+                </div>
+                <div class="col col-md-10">
+                  <select class="form-select" style="width: 30%;" id="collectorList" onchange="addRow()">
+                    <option selected>Collector</option>
+                    <option value="linux">Linux_host</option>
+                    <option value="windows">Windows_host</option>
+                  </select>
+                </div>
+               </div>
+              </div>
+              <div class="table-responsive p-3">
+                <table class="table">
+                    <tbody id="table_body">
+                      <tr>
+                        <th scope="row">HTTPS</th>
+                        <td>True</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">HOST</th>
+                        <td>10.4.160.170</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">PORT</th>
+                        <td>3000</td>
+                      </tr>
+                    </tbody>
+                  </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5 mb-lg-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0 p-3">
+                <h6 class="mb-2">Job Name on Prometheus.</h6>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    ACTIONS
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" onclick="RunPrometheusOnDocker('grafana')" href="#">Run Grafana</a></li>
+                    <li><a class="dropdown-item" id="btnInstall" onclick="RestartContainer('grafana')" href="#">Restart Grafana</a></li>
+                  </ul>
+                </div>
+                
+                <button type="button" class="btn btn-primary">Open Grafana</button>
+              </div>
+              <div class="card-body">
+                <table class="table table-striped table-hover" id="tableGroup">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Group</th>
+                      <th scope="col">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableBodyHost"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-4" id="Console" tabindex="0">
+          <div class="col-lg-12 mb-lg-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0 p-3 bg-dark">
+                <h6 class="mb-2 text-light font-weight-bold">Console</h6>
+              </div>
+              <div class="card-body" style="background-color: black;">
+               <pre class="text-info" id="output"></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="newGroupModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Create new Group</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="p-3">
+                  <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                      <label for="job_name" class="col-form-label">Group name : </label>
+                    </div>
+                    <div class="col-md">
+                      <input type="text" id="new_group_name" class="form-control">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="createNewGroup()">Create</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal modal-dialog modal-lg fade" id="EngineerMode" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Engineer Mode</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="p-3">
+                  <div class="row g-3 align-items-center">
+                   <textarea class="form-control text-success" style="background-color: black;" name="" id="text_editor" cols="30" rows="10"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveFileEnMode()" >Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+          var socket = io();
+          // function RunPrometheusOnDocker() {
+          //   $('#btnInstall').attr('disabled',true)
+          //   $('#Console').focus()
+          //   $('#output').append('Installing...')
+          //   const command='docker run -d --name prometheus  -p 9090:9090 -v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus ';
+          //   socket.emit('dataCMD', { cmd: command});
+          //   socket.on('output', (data) => {
+          //       const output = document.getElementById('output');
+          //       output.innerHTML += data;
+          //   });
+          // }
+
+          function RunGrafanaOnDocker(container_name) {
+            $.ajax({
+              url: "/DockerRun",
+              method: "POST",
+              data:{container_name : container_name},
+              success: function (response) {
+                console.log(response);
+                $('#output').append(response)
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
+            });
+          }
+
+
+  
+      
+          function RestartContainer(container_name) {
+            
+            $.ajax({
+              url: "/DockerRestart",
+              method: "POST",
+              data:{container_name : container_name},
+              success: function (response) {
+                console.log(response);
+                $('#output').append(response)
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
+            });
+          }
+
+        </script>
+        <%- include('../partials/footer') %>
+      </div>
+    </main>
+  </body>
+</html>

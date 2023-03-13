@@ -23,6 +23,10 @@ var server = http.createServer(app).listen(3000, function(){
 var io = Socket(server);
 
 //-------------------------------------------------
+const os = require('os');
+const ifaces = os.networkInterfaces();
+
+let ipAddress = '';
 
 app.set('view engine','ejs')
 
@@ -63,22 +67,32 @@ io.on('connection', (socket) => {
 
 
 app.get('/',(req,res) => {
-  const results = Object.create(null);
-  for (const name of Object.keys(nets)) {
-    for (const net of nets[name]) {
-        // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
-        // 'IPv4' is in Node <= 17, from 18 it's a number 4 or 6
-        const familyV4Value = typeof net.family === 'string' ? 'IPv4' : 4
-        if (net.family === familyV4Value && !net.internal) {
-            if (!results[name]) {
-                results[name] = [];
-            }
-            results[name].push(net.address);
-        }
-    }
-  }
-  //console.log(results);
-  res.render('pages/index')
+  Object.keys(ifaces).forEach((ifname) => {
+    ifaces[ifname].forEach((iface) => {
+      if (iface.family === 'IPv4' && iface.internal === false) {
+        ipAddress = iface.address;
+      }
+    });
+  });
+  
+  console.log(`Server IP address is ${ipAddress}`);
+
+  var linuxHost = JSON.parse(fs.readFileSync('resources/inventory/linux_host.json','utf8')); 
+  var windowsHost = JSON.parse(fs.readFileSync('resources/inventory/windows_host.json','utf8')); 
+  console.log(linuxHost);
+  const linuxKeysArray = Object.keys(linuxHost);
+  const linuxLength = linuxKeysArray.length;
+  console.log('> '+linuxLength); 
+
+  const windowsKeysArray = Object.keys(windowsHost);
+  const windowsLength = windowsKeysArray.length;
+  console.log('> '+windowsLength); 
+
+  res.render('pages/index',{
+    IPADDR : ipAddress,
+    LINUXCOUNT : linuxLength,
+    WINSCOUNT : windowsLength
+  })
 })
 app.get('/linux',(req,res) => {
   var inventory = fs.readFileSync('resources/inventory/linux_host.ini','utf8'); 
@@ -92,6 +106,9 @@ app.get('/windows',(req,res) => {
 })
 app.get('/prometheus',(req,res) => {
   res.render('pages/prometheusConfig')
+})
+app.get('/grafana',(req,res) => {
+  res.render('pages/grafanaConfig')
 })
 app.get('/LinuxConfig/ReadFile',(req,res) => {
   var inventory = fs.readFileSync('resources/inventory/linux_host.json','utf8'); 
@@ -377,6 +394,14 @@ app.post('/DockerRun',(req,res) => {
   let cmd = "";
   if(container_name == "prometheus"){
     cmd = 'docker run -d --name prometheus  -p 9090:9090 -v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus ';
+  }else if(container_name == "grafana"){
+
+    cmd = `docker run -d --name grafana -p 0.0.0.0:3000:300/tcp 
+    -v /etc/grafana/certs:/etc/grafana/certs \
+    -v /etc/grafana/grafana.ini:/etc/grafana/grafana.ini \
+    -v /etc/grafana/home.json:/usr/share/grafana/public/dashboards/home.json \
+    alansup/mvi 
+    `;
   }
   var response;
     subProcess.exec(cmd, (err, stdout, stderr) => {

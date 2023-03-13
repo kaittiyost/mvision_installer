@@ -239,7 +239,14 @@
               data: { text: text, text_json: jsonData },
               success: function (response) {
                 if (response == "ok") {
-                  alert("Linux host is ready.");
+                  //alert("Linux host is ready.");
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Hosts changes saved.',
+                    text: 'Successfully saved to the linux_host file.',
+                  }).then(()=>{
+                    location.reload();
+                  })
                 }
               },
               error: function (xhr, status, error) {

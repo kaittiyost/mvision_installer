@@ -362,7 +362,14 @@
               success: function (response) {
                 if (response == "ok") {
                   $('#EngineerMode').modal('hide')
-                  alert("Saved.");
+                  //alert("Saved.");
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Job changes saved.',
+                    text: 'Successfully saved to the prometheus.yml file.',
+                  }).then(()=>{
+                    location.reload();
+                  })
                 }
               },
               error: function (xhr, status, error) {
@@ -422,7 +429,14 @@
               data: { text: new_job , text_obj:jsonData , tempData : tempData},
               success: function (response) {
                 if (response == "ok") {
-                  alert("Ok");
+                  //alert("Ok");
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Job changes saved.',
+                    text: 'Successfully saved to the prometheus.yml file.',
+                  }).then(()=>{
+                    location.reload();
+                  })
                 }
               },
               error: function (xhr, status, error) {
@@ -511,8 +525,15 @@
               method: "POST",
               data:{container_name : container_name},
               success: function (response) {
-                console.log(response);
+                //console.log(response);
                 $('#output').append(response)
+                Swal.fire({
+                    icon: 'success',
+                    title: `${container_name} is restarted.`,
+                    text: response,
+                  }).then(()=>{
+                    location.reload();
+                  })
               },
               error: function (xhr, status, error) {
                 console.error(xhr.responseText);

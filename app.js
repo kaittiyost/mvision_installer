@@ -499,13 +499,8 @@ app.post('/DockerRun',(req,res) => {
     const username = req.body.username;
     const password = req.body.password;
     const port = req.body.port;
-    cmd = `
-    docker run -d -it --rm  -p ${port}:9272 -e VSPHERE_USER=${username} \ 
-    -e VSPHERE_PASSWORD=${password} \
-    -e VSPHERE_HOST=${hostip} \
-    -e VSPHERE_IGNORE_SSL=True -e VSPHERE_SPECS_SIZE=2000 \
-    --name vmware_exporter pryorda/vmware_exporter
-    `
+    cmd = 
+    'docker run -d -it --rm  -p ${port}:9272 -e VSPHERE_USER=${username} -e VSPHERE_PASSWORD=${password} -e VSPHERE_HOST=${hostip} -e VSPHERE_IGNORE_SSL=True -e VSPHERE_SPECS_SIZE=2000 --name vmware_exporter pryorda/vmware_exporter'
   }
   var response;
     subProcess.exec(cmd, (err, stdout, stderr) => {

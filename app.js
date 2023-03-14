@@ -79,14 +79,14 @@ app.get('/',(req,res) => {
 
   var linuxHost = JSON.parse(fs.readFileSync('resources/inventory/linux_host.json','utf8')); 
   var windowsHost = JSON.parse(fs.readFileSync('resources/inventory/windows_host.json','utf8')); 
-  console.log(linuxHost);
+  //console.log(linuxHost);
   const linuxKeysArray = Object.keys(linuxHost);
   const linuxLength = linuxKeysArray.length;
-  console.log('> '+linuxLength); 
+  //console.log('> '+linuxLength); 
 
   const windowsKeysArray = Object.keys(windowsHost);
   const windowsLength = windowsKeysArray.length;
-  console.log('> '+windowsLength); 
+  //console.log('> '+windowsLength); 
 
   res.render('pages/index',{
     IPADDR : ipAddress,
@@ -103,6 +103,9 @@ app.get('/linux',(req,res) => {
 })
 app.get('/windows',(req,res) => {
   res.render('pages/windowsConfig')
+})
+app.get('/vmware',(req,res) => {
+  res.render('pages/vmwareConfig')
 })
 app.get('/prometheus',(req,res) => {
   res.render('pages/prometheusConfig')
@@ -146,6 +149,18 @@ app.get('/PrometheusConfig/ReadFileYML',(req,res) => {
 
 app.get('/PrometheusConfig/ReadFileJSON',(req,res) => {
   var inventory = fs.readFileSync('prometheus/prometheus.json','utf8'); 
+  console.log(inventory);
+  let data ;
+  if(inventory == ""){
+    data = 'empty';
+  }else{
+    data = inventory;
+  }
+  res.status(200).send(data);
+})
+
+app.get('/VmwareConfig/ReadFileJSON',(req,res) => {
+  var inventory = fs.readFileSync('resources/vmware/vsphere_host.json','utf8'); 
   console.log(inventory);
   let data ;
   if(inventory == ""){
@@ -239,6 +254,50 @@ app.post('/WindowsConfig/SaveFile',(req,res) => {
   }
 })
 
+app.get('/VmwareConfig/ReadFile',(req,res) => {
+  var inventory = fs.readFileSync(__dirname+'/resources/vmware/vsphere_host.json','utf8'); 
+  //console.log(inventory);
+  let data ;
+  if(inventory == ""){
+    data = 'empty';
+  }else{
+    data = inventory;
+  }
+  res.status(200).send(data);
+})
+
+app.post('/VmwareConfig/SaveFile',(req,res) => {
+  //let statusYML = 0;
+  //let statusJSON = 0;
+  const hostip = req.body.hostip;
+  let data = req.body.data 
+  console.log(hostip);
+  console.log('data[${hostip}]...');
+  console.log(data[`${hostip}`]);
+
+  // jsonPromData.collector[jsonPromData.collector.length] = new_job_obj;
+  // console.log(JSON.stringify(jsonPromData));
+
+  // Save .json
+  var oldData = JSON.parse(fs.readFileSync('resources/vmware/vsphere_host.json','utf8')); 
+  console.log("Old Data Before...");
+  console.log(oldData);
+  console.log('####################################');
+
+  oldData[`${hostip}`] = data[`${hostip}`];
+
+  console.log("\nOld Data After...");
+  console.log(oldData);
+  console.log('####################################');
+  fs.writeFile(__dirname+'/resources/vmware/vsphere_host.json', JSON.stringify(oldData) , function (err) {
+    if (err) throw err;
+    console.log('New text appended to file vsphere_host.json!');
+    statusJSON = 1;
+  });
+
+  res.status(200).send('ok')
+
+})
 app.post('/PrometheusConfig/SaveFile',(req,res) => {
   //let statusYML = 0;
   //let statusJSON = 0;
@@ -308,6 +367,16 @@ app.post('/PrometheusConfig/EnSaveJsonFile',(req,res) => {
   fs.writeFile(__dirname+'/prometheus/prometheus.json', new_cfg.toString() , function (err) {
     if (err) throw err;
     console.log('New text saved to file Prom.json!');
+    res.status(200).send('ok')
+  });
+})
+
+app.post('/VmwareConfig/EnSaveJsonFile',(req,res) => {
+  let new_cfg = req.body.cfg 
+  console.log(new_cfg);
+  fs.writeFile(__dirname+'/resources/vmware/vsphere_host.json', new_cfg.toString() , function (err) {
+    if (err) throw err;
+    console.log('New text saved to file vsphere_host.json!');
     res.status(200).send('ok')
   });
 })
@@ -387,7 +456,6 @@ app.get('/InstallWindowsExporter',(req,res) => {
 
 })
 
-
 app.post('/CurlExporter',(req,res) => {
 
   const ipaddress = req.body.ipaddr;
@@ -406,7 +474,7 @@ app.post('/CurlExporter',(req,res) => {
         res.status(500).send(stderr);
       } else {
         response = stdout
-        console.log(response);
+        //console.log(response);
         res.status(200).send(response);
       }
     })
@@ -425,6 +493,19 @@ app.post('/DockerRun',(req,res) => {
     -v /etc/grafana/home.json:/usr/share/grafana/public/dashboards/home.json \
     alansup/mvi 
     `;
+
+  }else if(container_name == "vmware_exporter"){
+    const hostip = req.body.hostip;
+    const username = req.body.username;
+    const password = req.body.password;
+    const port = req.body.port;
+    cmd = `
+    docker run -d -it --rm  -p ${port}:9272 -e VSPHERE_USER=${username} \ 
+    -e VSPHERE_PASSWORD=${password} \
+    -e VSPHERE_HOST=${hostip} \
+    -e VSPHERE_IGNORE_SSL=True -e VSPHERE_SPECS_SIZE=2000 \
+    --name vmware_exporter pryorda/vmware_exporter
+    `
   }
   var response;
     subProcess.exec(cmd, (err, stdout, stderr) => {

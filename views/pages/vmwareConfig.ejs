@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('../partials/head') %>
+    <script>
+      let jsonData = {};
+      let dataLength = 0;
+
+      window.onload = function () {
+        $('#btnAction').attr('disabled',true)
+        $.ajax({
+          url: "/VmwareConfig/ReadFile",
+          method: "GET",
+          success: function (response) {
+            if (response == "empty") {
+
+            } else {
+
+              const jsonObj = JSON.parse(response)
+              const length = Object.keys(jsonObj).length;
+    
+              const myDict = jsonObj;
+
+              for (const [ip, credentials] of Object.entries(myDict)) {
+                $("#table_docker_reunned").append(
+                  `
+                        <tr>
+                            <th scope="row">${1}</th>
+                            <td>${ip}</td>
+                            <td>${ credentials["PORT"]}</td>
+                            <td> <button class="btn btn-outline-primary" onclick="CurlExporter()">Curl</button></td>
+                        </tr>
+                        `
+                );
+
+              }
+            }
+          },
+          error: function (xhr, status, error) {
+            console.error(xhr.responseText);
+          },
+        });
+      };
+    </script>
+  </head>
+  <body class="g-sidenav-show bg-gray-100">
+    <div class="min-height-300 bg-dark position-absolute w-100"></div>
+    <%- include('../partials/sidebar') %>
+    <main class="main-content position-relative border-radius-lg">
+      <%- include('../partials/nav') %>
+      <div class="container-fluid py-4">
+        <div class="row mt-4">
+          <div class="col-lg-5 mb-lg-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0 p-3">
+                <div class="d-flex justify-content-between">
+                  <div class="row">
+                    <div class=" col-2">
+                      <a class="btn btn-icon-only btn-rounded btn-outline-dark mb-0 me-3 btn-md d-flex align-items-center justify-content-center" href="/"><i class="ni ni-bold-left" aria-hidden="true"></i></a> 
+                    </div>
+                    <div class="col-3 p-2">
+                    
+                        <img
+                        src="/assets/img/monitor/vsphere.png"
+                        width="80"
+                        alt=""
+                        srcset=""
+                      />
+                    </div>
+                    <div class=" col-7">
+                      <h4>Vsphere Config</h4>
+                      Support : Vsphere Client                   
+                    </div>
+                  </div>
+                </div>
+              </div>
+   
+              <div class="p-3">
+               <div class="row">
+                <div id="GroupNameShow"></div>
+               </div>
+              </div>
+              <div class="table-responsive p-3">
+                <table class="table align-items-center">
+                    <thead>
+                        <th>#</th>
+                        <th>HostIP</th>
+                        <th>Port</th>
+                        <th>Action</th>
+                    </thead>
+                    <tbody id="table_docker_reunned">
+                    </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-7 mb-lg-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0 p-3">
+                <h6 class="mb-2">Host Vsphere on Vmware-Exporter.</h6>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newGroupModal">
+                  New Host
+                </button>
+                <br>
+                      <a href="#" onclick="ReadFileJSON()">
+                        <i class="ni ni-bold-right" aria-hidden="true"></i> Open Engineer Mode
+                      </a>
+              </div>
+              <div class="card-body">
+                <table class="table table-striped table-hover" id="tableGroup">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Host</th>
+                      <th scope="col">Username</th>
+                      <th scope="col">Port</th>
+                      <th scope="col">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableBodyHost"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-4" id="Console" tabindex="0">
+          <div class="col-lg-12 mb-lg-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0 p-3 bg-dark">
+                <h6 class="mb-2 text-light font-weight-bold">Console</h6>
+              </div>
+              <div class="card-body" style="background-color: black;">
+               <pre class="text-info" id="output"></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="newGroupModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Create new Host</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="p-3">
+                  <div class="row g-3 align-items-center">
+                   <table>
+                    <tr>
+                        <th>HostIP</th>
+                        <td><input type="text" class="form-control" id="hostip"></td>
+                    </tr>
+                    <tr>
+                        <th>Username</th>
+                        <td><input type="text" class="form-control" id="username"></td>
+                    </tr>
+                    <tr>
+                        <th>Password</th>
+                        <td><input type="password" class="form-control" id="password"></td>
+                    </tr>
+                    <tr>
+                        <th>Port</th>
+                        <td><input type="number" class="form-control" id="port"></td>
+                    </tr>
+                   </table>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="createNewHost()">Create</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal modal-dialog modal-lg fade" id="EngineerMode" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Engineer Mode</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="p-3">
+                  <div class="row g-3 align-items-center">
+                   <textarea class="form-control text-success" style="background-color: black;" name="" id="text_editor" cols="30" rows="20"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveFileEnMode()" >Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal modal-dialog modal-lg fade" id="EngineerModeJobConfig" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Engineer Mode Job Config</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="p-3">
+                  <div class="row g-3 align-items-center">
+                   <textarea class="form-control text-success" style="background-color: black;" name="" id="text_editor_job" cols="30" rows="10"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveJsonFileEnMode()" >Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+          var socket = io();
+          // function RunPrometheusOnDocker() {
+          //   $('#btnInstall').attr('disabled',true)
+          //   $('#Console').focus()
+          //   $('#output').append('Installing...')
+          //   const command='docker run -d --name prometheus  -p 9090:9090 -v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus ';
+          //   socket.emit('dataCMD', { cmd: command});
+          //   socket.on('output', (data) => {
+          //       const output = document.getElementById('output');
+          //       output.innerHTML += data;
+          //   });
+          // }
+
+          function RunContainer(container_name) {
+
+            const hostip = $('#hostip').val()
+            const username = $('#username').val()
+            const password = $('#password').val()
+            const port = $('#port').val()
+
+            $('#output').append(`Running Container ${container_name}.. \n`)
+            $.ajax({
+              url: "/DockerRun",
+              method: "POST",
+              data:{
+                container_name : container_name,
+                hostip : hostip,
+                username : username,
+                password : password,
+                port : port
+                },
+              success: function (response) {
+                console.log(response);
+                $('#output').append(response)
+
+                $('#table_docker_reunned').append(
+                    `<tr>
+                        <td>${$('#hostip').val()}</td>
+                        <td>${$('#port').val()}</td>
+                        <td>
+                            <button class="btn btn-primary" onclick="CurlExporter('vmware_exporter')">Run</button>
+                        </td>
+                    </tr>`
+                )
+
+                
+
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
+            });
+
+            let dataToJson = {}
+                dataToJson[$('#hostip').val()] = {
+                    "USERNAME":$('#username').val(),
+                    "PASSWORD":$('#password').val(),
+                    "PORT":$('#port').val()
+                }
+                $.ajax({
+                    url: "/VmwareConfig/SaveFile",
+                    method: "POST",
+                    data: { data: dataToJson,hostip:$('#hostip').val()},
+                    success: function (response) {
+                        if (response == "ok") {
+                        //alert("Ok");
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Job changes saved.',
+                            text: 'Successfully saved to the prometheus.yml file.',
+                        }).then(()=>{
+                            location.reload();
+                        })
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                    },
+                    });
+
+          }
+
+
+          function createNewHost(){
+            
+            let counter = 1;
+            $("#tableBodyHost").append(
+              `<tr>
+                    <td>
+                        ${counter}
+                    </td>
+                    <td>
+                        ${$('#hostip').val()}
+                    </td>
+                    <td>
+                        ${$('#username').val()}
+                    </td>
+                    <td>
+                        ${$('#port').val()}
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" onclick="RunContainer('vmware_exporter')">Run</button>
+                    </td>
+                </tr>`
+            );
+            counter++;
+            $('#newGroupModal').modal('hide')
+          }
+
+          function CurlExporter(ipaddress) {
+            //$('#btnInstall').attr('disabled',true)
+            $('#Console').focus()
+            $('#output').append('curl... ['+ipaddress+':9100] \n')
+            $.ajax({
+              url: "/CurlExporter",
+              method: "POST",
+              data:{ipaddr:ipaddress,os_type:'linux'},
+              success: function (response) {
+                console.log(response);
+                $('#output').append(response)
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
+            });
+          }
+
+          function configTarget(group_name){
+            $('#table_body').empty()
+            $('#btnAction').attr('disabled',false)
+            $('#GroupNameShow').html('You are creating a group : '+group_name)
+            $('#job_name_current').val(group_name)
+            // console.log(targets_arr);
+          }
+
+          function addRow() {
+            let collectorList = $('#collectorList').val();
+            let path = "";
+            let port = 0;
+            if(collectorList == "linux"){
+              path = "/LinuxConfig/ReadFile"
+              port = 9100;
+            }else if(collectorList == "windows"){
+              path = "/WindowsConfig/ReadFile"
+              port = 9182;
+            }
+            $.ajax({
+              url: path,
+              method: "GET",
+              data: { type: "linux" },
+              success: function (response) {
+                if (response == "empty") {
+                  $("#tableHost").html("Host net set.");
+                  $("#btnAction").attr("onclick", "saveFile()");
+                } else {
+                  const toJson = JSON.parse(response);
+                  
+                  dataLength = Object.keys(toJson).length;
+                  
+                  $("#table_body").empty()
+                  for (i = 0; i < Object.keys(toJson).length; i++) {
+                    let key_array = [];
+                    key_array.push(toJson[`row${i}`][0]);
+                    key_array.push(toJson[`row${i}`][1]);
+
+                    console.log('key_array :'+key_array);
+
+                    jsonData[`row${i}`] = key_array;
+
+                    row++;counter++;
+                    $("#table_body").append(
+                      `<tr id="row${i}">
+                                <td id="row${i}col0">
+                                    <input type="text" id="input_row${i}col0" class="form-control" value="${
+                        JSON.parse(response)[`row${i}`][0]
+                      }">
+                                </td>
+                                <td id="row${i}col1">
+                                    <input type="text" id="input_row${i}col1" class="form-control" value="${
+                       port
+                      }">
+                                </td>
+                                <td id="row${i}col3">
+                                    <a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${row})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
+                                </td>
+                            </tr>`
+                    );
+                    $("#btnAction").attr("onclick", "saveFile()");
+                  }
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
+
+          function saveFileEnMode() {
+
+            let config = $('#text_editor').val()
+            console.log(config);
+            $.ajax({
+              url: "/PrometheusConfig/EnSaveFile",
+              method: "POST",
+              data: { cfg: config },
+              success: function (response) {
+                if (response == "ok") {
+                  $('#EngineerMode').modal('hide')
+                  //alert("Saved.");
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Job changes saved.',
+                    text: 'Successfully saved to the prometheus.yml file.',
+                  }).then(()=>{
+                    location.reload();
+                  })
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
+
+          function saveJsonFileEnMode() {
+
+            let config = $('#text_editor_job').val()
+            console.log(config);
+            $.ajax({
+              url: "/VmwareConfig/EnSaveJsonFile",
+              method: "POST",
+              data: { cfg: config },
+              success: function (response) {
+                if (response == "ok") {
+                  $('#EngineerModeJobConfig').modal('hide')
+                  //alert("Saved.");
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Vsphere changes saved.',
+                    text: 'Successfully saved to the vmware_host.json file.',
+                  }).then(()=>{
+                    location.reload();
+                  })
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+            }
+
+          var tempData = {}; // For remove '' becourse "'10.4.160.xx'"
+          function saveFile() {
+            let new_job ;
+            let job_name = $('#job_name_current').val()
+            console.log("row = " + row);
+            console.log("connter = " + counter);
+            if (row == 0) {
+                jsonData = {};
+            } else {
+              let key_array = [];
+              let key_array_temp = [];
+              for (c = 0; c <= counter; c++) {
+                if ($(`#input_row${c}col${0}`).val() === undefined) {
+                } else {
+                  let host  = "'"+$(`#input_row${c}col${0}`).val()+":";
+                  let port = $(`#input_row${c}col${1}`).val()+"'";
+
+                  // for write json file
+                  let hostjson  = $(`#input_row${c}col${0}`).val()+":";
+                  let portjson = $(`#input_row${c}col${1}`).val();
+
+                  key_array.push(`${host+port}`);
+                  key_array_temp.push(`${hostjson+portjson}`);
+                  console.log(key_array);
+                  new_job = ` 
+                  \n
+  - job_name: ${job_name} 
+    scrape_interval: 5s
+    static_configs:
+      - targets: [${key_array}]`;
+
+                  jsonData['job_name'] = job_name;
+                  jsonData['targets'] = key_array;
+
+                  tempData['job_name'] = job_name;
+                  tempData['targets'] = key_array_temp;
+
+                  $('#output').append(jsonData);
+     
+                }
+              }
+            }
+            //console.log(new_job);
+            //console.log(jsonData); //obj
+
+            $.ajax({
+              url: "/PrometheusConfig/SaveFile",
+              method: "POST",
+              data: { text: new_job , text_obj:jsonData , tempData : tempData},
+              success: function (response) {
+                if (response == "ok") {
+                  //alert("Ok");
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Job changes saved.',
+                    text: 'Successfully saved to the prometheus.yml file.',
+                  }).then(()=>{
+                    location.reload();
+                  })
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
+
+          function ReadFileByName(JobName,index){
+              $('#btn_add_host').attr('disabled',true)
+              $('#btnAction').attr('disabled',true)
+              $.ajax({
+                url: "/PrometheusConfig/ReadFileByName",
+                data:{job_index:index},
+                method: "POST",
+                success: function (response) {
+                  if (response == "empty") {
+                     //$("#tableHost").html("Host net set.");
+                     //$("#btnAction").attr("onclick", "saveFile()");
+                  } else {
+                    const prepareJson = JSON.stringify(response);
+                    const toJson = JSON.parse(prepareJson)
+                    //console.log(JSON.parse(toJson));
+                   
+                    for (i = 0; i < toJson.targets.length; i++) {
+                      const host_ip = toJson.targets[i].split(":")[0];
+                      const port = toJson.targets[i].split(":")[1];
+                      $("#table_body").append(
+                          `<tr id="row${i}">
+                                <td id="row${i}col0">
+                                    <input type="text" id="input_row${i}col0" class="form-control" value="${host_ip}">
+                                </td>
+                                <td id="row${i}col1">
+                                    <input type="text" id="input_row${i}col1" class="form-control" value="${port}">
+                                </td>
+                                <td id="row${i}col3">
+                                    <a class="btn btn-link text-danger text-gradient px-3 mb-0"  href="#">Curl</a>
+                                </td>
+                            </tr>`
+                        );
+                    }
+                  }
+                },
+                error: function (xhr, status, error) {
+                  console.error(xhr.responseText);
+                },
+              });
+          }
+
+
+          function ReadFileJSON(){
+              $.ajax({
+                url: "/VmwareConfig/ReadFileJSON",
+                method: "GET",
+                success: function (response) {
+                  console.log(response);
+                  if (response == "empty") {
+
+                  } else {
+                    console.log(response);
+                    $('textarea#text_editor_job').val(response)
+                  }
+                },
+                error: function (xhr, status, error) {
+                  console.error(xhr.responseText);
+                },
+              });
+
+              $('#EngineerModeJobConfig').modal('show')
+          }
+
+          function RestartContainer(container_name) {
+            
+            $.ajax({
+              url: "/DockerRestart",
+              method: "POST",
+              data:{container_name : container_name},
+              success: function (response) {
+                //console.log(response);
+                $('#output').append(response)
+                Swal.fire({
+                    icon: 'success',
+                    title: `${container_name} is restarted.`,
+                    text: response,
+                  }).then(()=>{
+                    location.reload();
+                  })
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
+            });
+          }
+
+        </script>
+        <%- include('../partials/footer') %>
+      </div>
+    </main>
+  </body>
+</html>

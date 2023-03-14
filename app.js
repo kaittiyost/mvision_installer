@@ -1,6 +1,6 @@
 const express = require('express')
 //const app = express()
-const port = 3000
+const PORT = 3009
 const path = require("path")
 var fs = require('fs'); 
 
@@ -16,8 +16,8 @@ const Socket= require('socket.io');
 
 const app = express();
 let jsonPromData = require('./prometheus/prometheus.json'); 
-var server = http.createServer(app).listen(3000, function(){
-  console.log("Express server listening on port " + 3000);
+var server = http.createServer(app).listen(PORT, function(){
+  console.log("Express server listening on port " + PORT);
 });
 
 var io = Socket(server);
@@ -65,7 +65,10 @@ io.on('connection', (socket) => {
 
 })
 
+app.get('/login',(req,res) => {
 
+  res.render('pages/login')
+})
 app.get('/',(req,res) => {
   Object.keys(ifaces).forEach((ifname) => {
     ifaces[ifname].forEach((iface) => {

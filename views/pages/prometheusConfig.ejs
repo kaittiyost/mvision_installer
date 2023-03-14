@@ -21,9 +21,9 @@
               $("#btnAction").attr("onclick", "saveFile()");
             } else {
               const toJson = JSON.parse(response);
-              console.log(toJson.collector.length);
+              console.log(toJson.collectors.length);
               
-              for (i = 0; i < toJson.collector.length; i++) {
+              for (i = 0; i < toJson.collectors.length; i++) {
                 // let key_array = [];
                 // key_array.push(toJson[`row${i}`][0]);
                 // key_array.push(toJson[`row${i}`][1]);
@@ -31,12 +31,12 @@
                 // console.log('key_array :'+key_array);
 
                 // jsonData[`row${i}`] = key_array;
-                targets_arr = toJson.collector[i].targets;
+                targets_arr = toJson.collectors[i].targets;
                 $("#tableBodyHost").append(
                   `
                         <tr>
                             <th scope="row">${i + 1}</th>
-                            <td>${toJson.collector[i].job_name}</td>
+                            <td>${toJson.collectors[i].job_name}</td>
                             <td> <button class="btn btn-primary" onclick="ReadFileByName('${toJson.collector[i].job_name}',${i})">View</button></td>
                         </tr>
                         `

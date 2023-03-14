@@ -152,6 +152,10 @@
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newGroupModal">
                   New Group
                 </button>
+                <br>
+                      <a href="#" onclick="ReadFileJSON()">
+                        <i class="ni ni-bold-right" aria-hidden="true"></i> Open Engineer Mode
+                      </a>
               </div>
               <div class="card-body">
                 <table class="table table-striped table-hover" id="tableGroup">
@@ -218,7 +222,7 @@
               <div class="modal-body">
                 <div class="p-3">
                   <div class="row g-3 align-items-center">
-                   <textarea class="form-control text-success" style="background-color: black;" name="" id="text_editor" cols="30" rows="10"></textarea>
+                   <textarea class="form-control text-success" style="background-color: black;" name="" id="text_editor" cols="30" rows="20"></textarea>
                   </div>
                 </div>
               </div>
@@ -229,6 +233,28 @@
             </div>
           </div>
         </div>
+        <div class="modal modal-dialog modal-lg fade" id="EngineerModeJobConfig" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Engineer Mode Job Config</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="p-3">
+                  <div class="row g-3 align-items-center">
+                   <textarea class="form-control text-success" style="background-color: black;" name="" id="text_editor_job" cols="30" rows="10"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveJsonFileEnMode()" >Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <script src="/socket.io/socket.io.js"></script>
         <script>
           var socket = io();
@@ -378,6 +404,33 @@
             });
           }
 
+          function saveJsonFileEnMode() {
+
+            let config = $('#text_editor_job').val()
+            console.log(config);
+            $.ajax({
+              url: "/PrometheusConfig/EnSaveJsonFile",
+              method: "POST",
+              data: { cfg: config },
+              success: function (response) {
+                if (response == "ok") {
+                  $('#EngineerModeJobConfig').modal('hide')
+                  //alert("Saved.");
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Job changes saved.',
+                    text: 'Successfully saved to the prometheus.json file.',
+                  }).then(()=>{
+                    location.reload();
+                  })
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+            }
+
           var tempData = {}; // For remove '' becourse "'10.4.160.xx'"
           function saveFile() {
             let new_job ;
@@ -518,6 +571,27 @@
               $('#EngineerMode').modal('show')
           }
         
+          function ReadFileJSON(){
+              $.ajax({
+                url: "/PrometheusConfig/ReadFileJSON",
+                method: "GET",
+                success: function (response) {
+                  console.log(response);
+                  if (response == "empty") {
+
+                  } else {
+                    console.log(response);
+                    $('textarea#text_editor_job').val(response)
+                  }
+                },
+                error: function (xhr, status, error) {
+                  console.error(xhr.responseText);
+                },
+              });
+
+              $('#EngineerModeJobConfig').modal('show')
+          }
+
           function RestartContainer(container_name) {
             
             $.ajax({

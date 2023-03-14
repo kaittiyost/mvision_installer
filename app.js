@@ -143,6 +143,19 @@ app.get('/PrometheusConfig/ReadFileYML',(req,res) => {
   }
   res.status(200).send(data);
 })
+
+app.get('/PrometheusConfig/ReadFileJSON',(req,res) => {
+  var inventory = fs.readFileSync('prometheus/prometheus.json','utf8'); 
+  console.log(inventory);
+  let data ;
+  if(inventory == ""){
+    data = 'empty';
+  }else{
+    data = inventory;
+  }
+  res.status(200).send(data);
+})
+
 app.get('/PrometheusConfig/ReadFile',(req,res) => {
   var inventory = fs.readFileSync('prometheus/prometheus.json','utf8'); 
   //console.log(inventory);
@@ -285,6 +298,16 @@ app.post('/PrometheusConfig/EnSaveFile',(req,res) => {
   fs.writeFile(__dirname+'/prometheus/prometheus.yml', new_cfg.toString() , function (err) {
     if (err) throw err;
     console.log('New text saved to file Prom.yml!');
+    res.status(200).send('ok')
+  });
+})
+
+app.post('/PrometheusConfig/EnSaveJsonFile',(req,res) => {
+  let new_cfg = req.body.cfg 
+  console.log(new_cfg);
+  fs.writeFile(__dirname+'/prometheus/prometheus.json', new_cfg.toString() , function (err) {
+    if (err) throw err;
+    console.log('New text saved to file Prom.json!');
     res.status(200).send('ok')
   });
 })

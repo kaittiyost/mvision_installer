@@ -264,17 +264,7 @@
                         </td>
                     </tr>`
                 )
-
-                
-
-              },
-              error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-                $('#output').append(xhr.responseText)
-              },
-            });
-
-            let dataToJson = {}
+                let dataToJson = {}
                 dataToJson[$('#hostip').val()] = {
                     "USERNAME":$('#username').val(),
                     "PASSWORD":$('#password').val(),
@@ -300,6 +290,13 @@
                         console.error(xhr.responseText);
                     },
                     });
+
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
+            });
 
           }
 

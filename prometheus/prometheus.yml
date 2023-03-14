@@ -12,14 +12,3 @@ scrape_configs:
   #   scrape_interval: 5s
   #   static_configs:
   #     - targets: ['10.4.160.133:9182'] 
-
-  - job_name: Windows 
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['10.4.160.133:9182','10.4.160.134:9182'] 
-                  
-
-  - job_name: Linux 
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['10.4.160.171:9100','10.4.160.172:9100']

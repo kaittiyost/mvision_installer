@@ -305,8 +305,8 @@ app.post('/PrometheusConfig/SaveFile',(req,res) => {
   let new_job_obj = req.body.tempData
   console.log(jsonPromData);
   console.log(new_job_obj);
-  console.log('length : '+jsonPromData.collector.length);
-  jsonPromData.collector[jsonPromData.collector.length] = new_job_obj;
+  console.log('length : '+jsonPromData.collectors.length);
+  jsonPromData.collectors[jsonPromData.collectors.length] = new_job_obj;
   console.log(JSON.stringify(jsonPromData));
 
   // Save .json

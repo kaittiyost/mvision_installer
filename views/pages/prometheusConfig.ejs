@@ -103,6 +103,7 @@
                     <option selected>Collector</option>
                     <option value="linux">Linux_host</option>
                     <option value="windows">Windows_host</option>
+                    <option value="vmware">Vsphere_host</option>
                   </select>
                 </div>
                </div>
@@ -326,6 +327,11 @@
               path = "/WindowsConfig/ReadFile"
               port = 9182;
             }
+            else if(collectorList == "vmware"){
+              path = "/VmwareConfig/ReadFile"
+              port = 9272;
+            }
+
             $.ajax({
               url: path,
               method: "GET",
@@ -335,7 +341,26 @@
                   $("#tableHost").html("Host net set.");
                   $("#btnAction").attr("onclick", "saveFile()");
                 } else {
-                  const toJson = JSON.parse(response);
+                  if(collectorList == "vmware"){
+                    const jsonObj = JSON.parse(response)
+                    const length = Object.keys(jsonObj).length;
+          
+                    const myDict = jsonObj;
+
+                    for (const [ip, credentials] of Object.entries(myDict)) {
+                      $("#table_body").append(
+                        `
+                              <tr>
+                                  <td>${ip}</td>
+                                  <td>${ credentials["PORT"]}</td>
+                                  <td><a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${row})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a></td>
+                              </tr>
+                              `
+                      );
+
+                    }
+                  }else{
+                    const toJson = JSON.parse(response);
                   
                   dataLength = Object.keys(toJson).length;
                   
@@ -369,6 +394,8 @@
                     );
                     $("#btnAction").attr("onclick", "saveFile()");
                   }
+                  }
+                  
                 }
               },
               error: function (xhr, status, error) {

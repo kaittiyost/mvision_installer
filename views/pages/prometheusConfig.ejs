@@ -145,6 +145,7 @@
                     ACTIONS
                   </button>
                   <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" onclick="AddDatasource('prometheus')" href="#">Add Datasource</a></li>
                     <li><a class="dropdown-item" onclick="RunPrometheusOnDocker('prometheus')" href="#">Run Prometheus</a></li>
                     <li><a class="dropdown-item" id="btnInstall" onclick="RestartContainer('prometheus')" href="#">Restart Prometheus</a></li>
                   </ul>
@@ -643,6 +644,34 @@
             });
           }
 
+
+          function AddDatasource(datasource_type){
+            let datasource_config = JSON.stringify({
+                "name": "MVISION Datasource",
+                "type": `${datasource_type}`,
+                "url": "http://10.4.160.170:9090",
+                "access": "proxy",
+                "basicAuth": false
+              });
+
+            var settings = {
+              "url": "/AddGrafanaDatasource",
+              "method": "POST",
+              "timeout": 0,
+              "data": {data : datasource_config}
+            };
+
+            $.ajax(settings).done(function (response) {
+              console.log(response);    
+                $('#output').append(response)
+                Swal.fire({
+                    icon: 'success',
+                    title: `New Datasource is added.`,
+                    text: "MVISION Datasource DBtype: Prometheus",
+                })  
+              
+            });
+          }
         </script>
         <%- include('../partials/footer') %>
       </div>

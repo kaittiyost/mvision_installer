@@ -12,14 +12,26 @@ const subProcess = require('child_process')
 //-------------------------------------------------
 const { spawn } = require('child_process');
 const http = require('http');
+const https = require('node:https');
+
 const Socket= require('socket.io');
 
 const app = express();
 let jsonPromData = require('./prometheus/prometheus.json'); 
 
-var server = http.createServer(app).listen(PORT, function(){
+
+const options = {
+  key: fs.readFileSync('certs/key.pem'),
+  cert: fs.readFileSync('certs/cert.pem'),
+};
+
+var server = https.createServer(options,app).listen(PORT, function(){
   console.log("MVSION Installer Status [OK]\nOpen a browser to http://localhost:" + PORT+"/login");
 });
+
+// var server = http.createServer(app).listen(PORT, function(){
+//   console.log("MVSION Installer Status [OK]\nOpen a browser to http://localhost:" + PORT+"/login");
+// });
 
 var io = Socket(server);
 
@@ -523,6 +535,36 @@ app.post('/DockerRestart',(req,res) => {
   const cmd = `
   docker restart ${container_name}
   `;
+  var response;
+    subProcess.exec(cmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err)
+        res.status(500).send(stderr);
+      } else {
+        response = stdout
+        console.log(response);
+        res.status(200).send(response);
+      }
+    })
+})
+app.post('/AddGrafanaDatasource',(req,res) => {
+  const data = JSON.parse(req.body.data);
+  let cmd = 
+  `
+  curl -X POST \
+  -k https://10.4.160.170:3002/api/datasources \
+  -H 'Authorization: Bearer eyJrIjoiUTV5OE12cHo3VjNleVRNdzlQMUxSNU5yOVJkbmUxRngiLCJuIjoidGVzdCIsImlkIjoxfQ==' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "${data.name}",
+    "type": "${data.type}",
+    "url": "http://10.4.160.170:9090",
+    "access": "proxy",
+    "basicAuth": false
+  }'
+  `
+  console.log(cmd);
+
   var response;
     subProcess.exec(cmd, (err, stdout, stderr) => {
       if (err) {

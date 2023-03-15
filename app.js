@@ -12,7 +12,7 @@ const subProcess = require('child_process')
 //-------------------------------------------------
 const { spawn } = require('child_process');
 const http = require('http');
-const https = require('node:https');
+const https = require('https');
 
 const Socket= require('socket.io');
 
@@ -26,7 +26,7 @@ const options = {
 };
 
 var server = https.createServer(options,app).listen(PORT, function(){
-  console.log("MVSION Installer Status [OK]\nOpen a browser to http://localhost:" + PORT+"/login");
+  console.log("MVSION Installer Status [OK]\nOpen a browser to https://localhost:" + PORT+"/login");
 });
 
 // var server = http.createServer(app).listen(PORT, function(){

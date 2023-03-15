@@ -18,7 +18,7 @@ const app = express();
 let jsonPromData = require('./prometheus/prometheus.json'); 
 
 var server = http.createServer(app).listen(PORT, function(){
-  console.log("MVSION Installer Status [OK]\n Open a browser to localhost:" + PORT);
+  console.log("MVSION Installer Status [OK]\nOpen a browser to http://localhost:" + PORT+"/login");
 });
 
 var io = Socket(server);
@@ -67,7 +67,6 @@ io.on('connection', (socket) => {
 })
 
 app.get('/login',(req,res) => {
-
   res.render('pages/login')
 })
 app.get('/',(req,res) => {

@@ -1,1 +1,3 @@
-{"collectors":[{"job_name":"Linux","targets":["10.4.160.171:9100","10.4.160.172:9100"]}]}
+{"collectors":[
+    
+]}

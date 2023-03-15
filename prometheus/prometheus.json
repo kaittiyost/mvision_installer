@@ -1,3 +1,1 @@
-{"collectors":[
-    
-]}
+{"collectors":[{"job_name":"Windows","targets":["10.4.160.133:9182","10.4.160.134:9182"]}]}

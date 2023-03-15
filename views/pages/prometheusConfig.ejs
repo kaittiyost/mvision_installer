@@ -310,8 +310,8 @@
           }
 
           function configTarget(group_name){
+            $("#btnAction").attr('disabled', false);
             $('#table_body').empty()
-            $('#btnAction').attr('disabled',false)
             $('#GroupNameShow').html('You are creating a group : '+group_name)
             $('#job_name_current').val(group_name)
             // console.log(targets_arr);
@@ -319,6 +319,8 @@
 
           function addRow() {
             let collectorList = $('#collectorList').val();
+            //$("#btnAction").attr('disabled', false);
+
             let path = "";
             let port = 0;
             if(collectorList == "linux"){

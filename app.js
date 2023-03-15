@@ -201,15 +201,15 @@ app.post('/PrometheusConfig/ReadFileByName',(req,res) => {
   const job_index = req.body.job_index;
   var inventory = fs.readFileSync('prometheus/prometheus.json','utf8'); 
   let targets_json = JSON.parse(inventory); 
-  //console.log(job_index);
-  //console.log(targets_json);
-  //console.log(targets_json.collector[job_index]);
+  // console.log(job_index);
+  // console.log(targets_json);
+  // console.log(targets_json.collectors[job_index]);
   
   let data ;
   if(inventory == ""){
     data = 'empty';
   }else{
-    data = targets_json.collector[job_index];
+    data = targets_json.collectors[job_index];
   }
   res.status(200).send(data);
 })

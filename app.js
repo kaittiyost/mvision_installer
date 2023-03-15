@@ -502,7 +502,7 @@ app.post('/DockerRun',(req,res) => {
     cmd = 'docker run -d --name prometheus  -p 9090:9090 -v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus ';
   }else if(container_name == "grafana"){
 
-    cmd = `docker run -d --name grafana -p 0.0.0.0:3000:300/tcp 
+    cmd = `docker run -d --name grafana -p 0.0.0.0:3000:3000/tcp 
     -v /etc/grafana/certs:/etc/grafana/certs \
     -v /etc/grafana/grafana.ini:/etc/grafana/grafana.ini \
     -v /etc/grafana/home.json:/usr/share/grafana/public/dashboards/home.json \
@@ -515,7 +515,7 @@ app.post('/DockerRun',(req,res) => {
     const password = req.body.password;
     const port = req.body.port;
     cmd = 
-    'docker run -d -it --rm  -p ${port}:9272 -e VSPHERE_USER=${username} -e VSPHERE_PASSWORD=${password} -e VSPHERE_HOST=${hostip} -e VSPHERE_IGNORE_SSL=True -e VSPHERE_SPECS_SIZE=2000 --name vmware_exporter pryorda/vmware_exporter'
+    'docker run -d -it --rm  -p 9272:9272 -e VSPHERE_USER=${username} -e VSPHERE_PASSWORD=${password} -e VSPHERE_HOST=${hostip} -e VSPHERE_IGNORE_SSL=True -e VSPHERE_SPECS_SIZE=2000 --name vmware_exporter pryorda/vmware_exporter'
   }
   var response;
     subProcess.exec(cmd, (err, stdout, stderr) => {

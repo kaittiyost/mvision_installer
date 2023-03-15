@@ -16,8 +16,9 @@ const Socket= require('socket.io');
 
 const app = express();
 let jsonPromData = require('./prometheus/prometheus.json'); 
+
 var server = http.createServer(app).listen(PORT, function(){
-  console.log("Express server listening on port " + PORT);
+  console.log("MVSION Installer Status [OK]\n Open a browser to localhost:" + PORT);
 });
 
 var io = Socket(server);

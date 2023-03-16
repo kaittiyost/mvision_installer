@@ -84,7 +84,8 @@ app.get('/login',(req,res) => {
 app.get('/',(req,res) => {
   Object.keys(ifaces).forEach((ifname) => {
     ifaces[ifname].forEach((iface) => {
-      if (iface.family === 'IPv4' && iface.internal === false) {
+      if (iface.family === 'IPv4') {
+        console.log(iface);
         ipAddress = iface.address;
       }
     });

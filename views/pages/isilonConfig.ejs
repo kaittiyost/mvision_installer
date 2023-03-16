@@ -61,15 +61,15 @@
                     <div class="col-3 p-2">
                     
                         <img
-                        src="/assets/img/monitor/grafana.png"
+                        src="/assets/img/monitor/dellemc.png"
                         width="80"
                         alt=""
                         srcset=""
                       />
                     </div>
                     <div class=" col-7">
-                      <h4>Grafana Dashboard Config</h4>
-                      Support : Mvision Version.                
+                      <h4>DELL Isilon Config</h4>
+                      Support : Dell Isilon Cluster                   
                     </div>
                   </div>
                 </div>
@@ -97,18 +97,18 @@
           <div class="col-lg-7 mb-lg-0 mb-4">
             <div class="card">
               <div class="card-header pb-0 p-3">
-                <h6 class="mb-2">Grafana Dashboard (Mvision)</h6>
+                <h6 class="mb-2">Isilon Cluster</h6>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                       ACTIONS
                     </button>
                     <ul class="dropdown-menu bg-light">
-                      <li><a class="dropdown-item text-dark"  data-bs-toggle="modal" data-bs-target="#newGroupModal" href="#">Run Grafana</a></li>
-                      <li><a class="dropdown-item text-dark" id="btnInstall" onclick="RestartContainer('mvi')" href="#">Restart Grafana</a></li>
+                      <li><a class="dropdown-item text-dark"  data-bs-toggle="modal" data-bs-target="#newGroupModal" href="#">Run InfluxDB</a></li>
+                      <li><a class="dropdown-item text-dark" id="btnInstall" onclick="RestartContainer('prometheus')" href="#">Restart InfluxDB</a></li>
                     </ul>
                   </div>
                 <br>
-                      <a href="#" onclick="ReadFileJSON()">
+                      <a href="#" onclick="ReadFileCFG()">
                         <i class="ni ni-bold-right" aria-hidden="true"></i> Open Engineer Mode
                       </a>
               </div>
@@ -146,7 +146,7 @@
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Grafana Config</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Isilon Config</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
@@ -154,16 +154,20 @@
                   <div class="row g-3 align-items-center">
                    <table>
                     <tr>
-                        <th>Image Name</th>
-                        <td><input type="text" value="alansup/mvi" disabled class="form-control" id="image_name"></td>
+                        <th>HostIP</th>
+                        <td><input type="text" class="form-control" id="hostip"></td>
                     </tr>
                     <tr>
-                        <th>Service Name</th>
-                        <td><input type="text" value="grafana" class="form-control" id="service_name"></td>
+                        <th>Username</th>
+                        <td><input type="text" class="form-control" id="username"></td>
+                    </tr>
+                    <tr>
+                        <th>Password</th>
+                        <td><input type="password" class="form-control" id="password"></td>
                     </tr>
                     <tr>
                         <th>Port</th>
-                        <td><input type="text" class="form-control" value="3000" id="port"></td>
+                        <td><input type="number" class="form-control" value="8080" id="port"></td>
                     </tr>
                    </table>
                   </div>
@@ -171,38 +175,17 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="RunContainer('mvi')">Run</button>
+                <button type="button" class="btn btn-primary" onclick="RunContainer('isi_mon')">Run</button>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="modal modal-dialog modal-lg fade" id="EngineerMode" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Engineer Mode</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <div class="p-3">
-                  <div class="row g-3 align-items-center">
-                   <textarea class="form-control text-success" style="background-color: black;" name="" id="text_editor" cols="30" rows="20"></textarea>
-                  </div>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="saveFileEnMode()" >Save</button>
-              </div>
-            </div>
-          </div>
-        </div>
         <div class="modal modal-dialog modal-lg fade" id="EngineerModeJobConfig" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Engineer Mode Job Config</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Engineer Mode Cluster Config</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
@@ -214,7 +197,7 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="saveJsonFileEnMode()" >Save</button>
+                <button type="button" class="btn btn-primary" onclick="saveFileEnMode()" >Save</button>
               </div>
             </div>
           </div>
@@ -420,10 +403,10 @@
 
           function saveFileEnMode() {
 
-            let config = $('#text_editor').val()
+            let config = $('#text_editor_job').val()
             console.log(config);
             $.ajax({
-              url: "/PrometheusConfig/EnSaveFile",
+              url: "/isilonConfig/EnSaveFile",
               method: "POST",
               data: { cfg: config },
               success: function (response) {
@@ -432,8 +415,8 @@
                   //alert("Saved.");
                   Swal.fire({
                     icon: 'success',
-                    title: 'Job changes saved.',
-                    text: 'Successfully saved to the prometheus.yml file.',
+                    title: 'Cluster changes saved.',
+                    text: 'Successfully saved to the isi_data_insights_d.cfg file.',
                   }).then(()=>{
                     location.reload();
                   })
@@ -539,51 +522,9 @@
             });
           }
 
-          function ReadFileByName(JobName,index){
-              $('#btn_add_host').attr('disabled',true)
-              $('#btnAction').attr('disabled',true)
+          function ReadFileCFG(){
               $.ajax({
-                url: "/PrometheusConfig/ReadFileByName",
-                data:{job_index:index},
-                method: "POST",
-                success: function (response) {
-                  if (response == "empty") {
-                     //$("#tableHost").html("Host net set.");
-                     //$("#btnAction").attr("onclick", "saveFile()");
-                  } else {
-                    const prepareJson = JSON.stringify(response);
-                    const toJson = JSON.parse(prepareJson)
-                    //console.log(JSON.parse(toJson));
-                   
-                    for (i = 0; i < toJson.targets.length; i++) {
-                      const host_ip = toJson.targets[i].split(":")[0];
-                      const port = toJson.targets[i].split(":")[1];
-                      $("#table_body").append(
-                          `<tr id="row${i}">
-                                <td id="row${i}col0">
-                                    <input type="text" id="input_row${i}col0" class="form-control" value="${host_ip}">
-                                </td>
-                                <td id="row${i}col1">
-                                    <input type="text" id="input_row${i}col1" class="form-control" value="${port}">
-                                </td>
-                                <td id="row${i}col3">
-                                    <a class="btn btn-link text-danger text-gradient px-3 mb-0"  href="#">Curl</a>
-                                </td>
-                            </tr>`
-                        );
-                    }
-                  }
-                },
-                error: function (xhr, status, error) {
-                  console.error(xhr.responseText);
-                },
-              });
-          }
-
-
-          function ReadFileJSON(){
-              $.ajax({
-                url: "/VmwareConfig/ReadFileJSON",
+                url: "/isilonConfig/ReadFileCFG",
                 method: "GET",
                 success: function (response) {
                   console.log(response);
@@ -623,6 +564,34 @@
                 console.error(xhr.responseText);
                 $('#output').append(xhr.responseText)
               },
+            });
+          }
+
+          function AddDatasource(datasource_type){
+            let datasource_config = JSON.stringify({
+                "name": "MVISION InfluxDB",
+                "type": `${datasource_type}`,
+                "url": "http://10.4.160.170:8086",
+                "access": "proxy",
+                "basicAuth": false
+              });
+
+            var settings = {
+              "url": "/AddGrafanaDatasource",
+              "method": "POST",
+              "timeout": 0,
+              "data": {data : datasource_config}
+            };
+
+            $.ajax(settings).done(function (response) {
+              console.log(response);    
+                $('#output').append(response)
+                Swal.fire({
+                    icon: 'success',
+                    title: `New Datasource is added.`,
+                    text: "MVISION InfluxDB DBtype: InfluxDB",
+                })  
+              
             });
           }
 

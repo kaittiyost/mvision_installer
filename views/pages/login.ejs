@@ -7,30 +7,47 @@
 
       <div class="row" style="height: 100%;">
        <div class="col col-4">
-        <form class="p-4" style="margin-top: 30%;">
+        <div class="p-4" style="margin-top: 30%;">
             <img src="/assets/img/mfec/Logo-MFEC.png" style="width: 100px;" alt="" srcset="">
             <h1>MVISION <label style="font-size: 40%;" for="">Installer</label></h1>
             <br>
+            <div id="alert"></div>
             <div class="mt-2 mb-3">
               <label for="exampleInputEmail1" class="form-label">Email address</label>
-              <input type="email" class="form-control" id="exampleInputEmail1" value="example@vsphere.local">
+              <input type="email" class="form-control" id="username">
             </div>
             <div class="mb-3">
               <label for="exampleInputPassword1" class="form-label">Password</label>
-              <input type="password" class="form-control" id="exampleInputPassword1">
+              <input type="password" class="form-control" id="password">
             </div>
             <div class="mb-3 form-check">
               <input type="checkbox" class="form-check-input" id="exampleCheck1">
               <label class="form-check-label" for="exampleCheck1">Check me out</label>
             </div>
-            <a type="submit" class="btn btn-dark w-100" href="/">Login</a>
-          </form>
+                <button class="btn btn-dark w-100" onclick="checkLogin()">Login</button>
+        </div>
           <!-- <div style="margin-top: 50%;"></div> -->
        </div>
        <div class="col col-8">
             <img src="/assets/img/mfec/graph_bg.png" width="1524px" alt="" srcset="">
        </div>
- 
       </div>
+
+      <script>
+        function checkLogin(){
+            const username = $('#username').val();
+            const password = $('#password').val();
+
+            console.log(username+password);
+
+            if(username == 'admin' && password == 'admin'){
+                window.location.assign('/');
+            }else{
+                $('#alert').html(
+                    '<div class="alert alert-danger">Usernmae or Password Incorrect.</div>'
+                )
+            }
+        }
+      </script>
     
   <%- include('../partials/footer') %>

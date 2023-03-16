@@ -9,30 +9,40 @@
       window.onload = function () {
         $('#btnAction').attr('disabled',true)
         $.ajax({
-          url: "/VmwareConfig/ReadFile",
+          url: "/InfluxDBConfig/ReadFile",
           method: "GET",
           success: function (response) {
+            // console.log(response);
             if (response == "empty") {
 
             } else {
 
               const jsonObj = JSON.parse(response)
-              const length = Object.keys(jsonObj).length;
-    
               const myDict = jsonObj;
-
-              for (const [ip, credentials] of Object.entries(myDict)) {
+                let counter = 1;
+              for (const [service_name, credentials] of Object.entries(myDict)) {
                 $("#table_docker_reunned").append(
                   `
                         <tr>
-                            <th scope="row">${1}</th>
-                            <td>${ip}</td>
-                            <td>${ credentials["PORT"]}</td>
-                            <td> <button class="btn btn-outline-primary" onclick="CurlExporter()">Curl</button></td>
+                            <th scope="row">${counter}</th>
+                            <td>${service_name}</td>
+                            <td>${ credentials["port"]}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                      ACTIONS
+                                    </button>
+                                    <ul class="dropdown-menu bg-light">
+                                      <li><a class="dropdown-item"  data-bs-toggle="modal" data-bs-target="#newGroupModal" href="#">Stop</a></li>
+                                      <li><a class="dropdown-item" id="btnInstall" onclick="RestartContainer('prometheus')" href="#">Restart</a></li>
+                                      <li><a class="dropdown-item"  data-bs-toggle="modal" data-bs-target="#newGroupModal" href="#">Remove</a></li>
+                                    </ul>
+                                </div>  
+                            </td>
                         </tr>
                         `
                 );
-
+                counter++;
               }
             }
           },
@@ -50,7 +60,7 @@
       <%- include('../partials/nav') %>
       <div class="container-fluid py-4">
         <div class="row mt-4">
-          <div class="col-lg-5 mb-lg-0 mb-4">
+          <div class="col-lg-6 mb-lg-0 mb-4">
             <div class="card">
               <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
@@ -61,30 +71,24 @@
                     <div class="col-3 p-2">
                     
                         <img
-                        src="/assets/img/monitor/grafana.png"
+                        src="/assets/img/monitor/influxdb.png"
                         width="80"
                         alt=""
                         srcset=""
                       />
                     </div>
                     <div class=" col-7">
-                      <h4>Grafana Dashboard Config</h4>
-                      Support : Mvision Version.                
+                      <h4>InfluxDB Config</h4>
+                      Support : Dell Isilon Cluster                   
                     </div>
                   </div>
                 </div>
-              </div>
-   
-              <div class="p-3">
-               <div class="row">
-                <div id="GroupNameShow"></div>
-               </div>
               </div>
               <div class="table-responsive p-3">
                 <table class="table align-items-center">
                     <thead>
                         <th>#</th>
-                        <th>HostIP</th>
+                        <th>ServiceName</th>
                         <th>Port</th>
                         <th>Action</th>
                     </thead>
@@ -94,21 +98,22 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-7 mb-lg-0 mb-4">
+          <div class="col-lg-6 mb-lg-0 mb-4">
             <div class="card">
               <div class="card-header pb-0 p-3">
-                <h6 class="mb-2">Grafana Dashboard (Mvision)</h6>
+                <h6 class="mb-2">Isilon Cluster</h6>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                       ACTIONS
                     </button>
                     <ul class="dropdown-menu bg-light">
-                      <li><a class="dropdown-item text-dark"  data-bs-toggle="modal" data-bs-target="#newGroupModal" href="#">Run Grafana</a></li>
-                      <li><a class="dropdown-item text-dark" id="btnInstall" onclick="RestartContainer('mvi')" href="#">Restart Grafana</a></li>
+                      <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#AddDatasourceModal"   href="#">Add Datasource</a></li>
+                      <li><a class="dropdown-item"  data-bs-toggle="modal" data-bs-target="#newGroupModal" href="#">Run InfluxDB</a></li>
+                      <li><a class="dropdown-item" id="btnInstall" onclick="RestartContainer('prometheus')" href="#">Restart InfluxDB</a></li>
                     </ul>
                   </div>
                 <br>
-                      <a href="#" onclick="ReadFileJSON()">
+                      <a href="#" onclick="" disabled>
                         <i class="ni ni-bold-right" aria-hidden="true"></i> Open Engineer Mode
                       </a>
               </div>
@@ -146,7 +151,7 @@
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Grafana Config</h5>
+                <h5 class="modal-title" id="exampleModalLabel">InfluxDB Config</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
@@ -155,15 +160,15 @@
                    <table>
                     <tr>
                         <th>Image Name</th>
-                        <td><input type="text" value="alansup/mvi" disabled class="form-control" id="image_name"></td>
+                        <td><input type="text" value="influxdb:1.8" disabled class="form-control" id="image_name"></td>
                     </tr>
                     <tr>
                         <th>Service Name</th>
-                        <td><input type="text" value="grafana" class="form-control" id="service_name"></td>
+                        <td><input type="text" value="influxdb" class="form-control" id="service_name"></td>
                     </tr>
                     <tr>
                         <th>Port</th>
-                        <td><input type="text" class="form-control" value="3000" id="port"></td>
+                        <td><input type="text" class="form-control" value="8086" id="port"></td>
                     </tr>
                    </table>
                   </div>
@@ -171,11 +176,46 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="RunContainer('mvi')">Run</button>
+                <button type="button" class="btn btn-primary" onclick="RunContainer('influxdb:1.8')">Run</button>
               </div>
             </div>
           </div>
         </div>
+
+        <div class="modal fade" id="AddDatasourceModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Add Datasource Config</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="p-3">
+                    <div class="row g-3 align-items-center">
+                     <table>
+                      <tr>
+                          <th>Datasource Name</th>
+                          <td><input type="text" value="my dataource" class="form-control" id="datasource_name"></td>
+                      </tr>
+                      <tr>
+                          <th>Host Name</th>
+                          <td><input type="text" value="http://localhost:8086" class="form-control" id="influx_hostname"></td>
+                      </tr>
+                      <tr>
+                          <th>Database</th>
+                          <td><input type="text" class="form-control" value="isi_data_insights" id="datasource_port"></td>
+                      </tr>
+                     </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary" onclick="AddDatasource('influxdb')">Add</button>
+                </div>
+              </div>
+            </div>
+          </div>
 
         <div class="modal modal-dialog modal-lg fade" id="EngineerMode" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog">
@@ -198,11 +238,11 @@
             </div>
           </div>
         </div>
-        <div class="modal modal-dialog modal-lg fade" id="EngineerModeJobConfig" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal modal-dialog modal-lg fade" id="InfluxdbConfigModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Engineer Mode Job Config</h5>
+                <h5 class="modal-title" id="exampleModalLabel">InfluxDB Config</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
@@ -236,10 +276,8 @@
           // }
 
           function RunContainer(container_name) {
-
-            const hostip = $('#hostip').val()
-            const username = $('#username').val()
-            const password = $('#password').val()
+            $('#newGroupModal').modal('hide')
+            const service_name = $('#service_name').val()
             const port = $('#port').val()
 
             $('#output').append(`Running Container ${container_name}.. \n`)
@@ -248,9 +286,7 @@
               method: "POST",
               data:{
                 container_name : container_name,
-                hostip : hostip,
-                username : username,
-                password : password,
+                service_name : service_name,
                 port : port
                 },
               success: function (response) {
@@ -329,32 +365,6 @@
             $('#newGroupModal').modal('hide')
           }
 
-          function CurlExporter(ipaddress) {
-            //$('#btnInstall').attr('disabled',true)
-            $('#Console').focus()
-            $('#output').append('curl... ['+ipaddress+':9100] \n')
-            $.ajax({
-              url: "/CurlExporter",
-              method: "POST",
-              data:{ipaddr:ipaddress,os_type:'linux'},
-              success: function (response) {
-                console.log(response);
-                $('#output').append(response)
-              },
-              error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-                $('#output').append(xhr.responseText)
-              },
-            });
-          }
-
-          function configTarget(group_name){
-            $('#table_body').empty()
-            $('#btnAction').attr('disabled',false)
-            $('#GroupNameShow').html('You are creating a group : '+group_name)
-            $('#job_name_current').val(group_name)
-            // console.log(targets_arr);
-          }
 
           function addRow() {
             let collectorList = $('#collectorList').val();
@@ -581,9 +591,9 @@
           }
 
 
-          function ReadFileJSON(){
+          function ReadFileCFG(){
               $.ajax({
-                url: "/VmwareConfig/ReadFileJSON",
+                url: "/isilonConfig/ReadFileCFG",
                 method: "GET",
                 success: function (response) {
                   console.log(response);

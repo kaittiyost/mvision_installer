@@ -345,6 +345,7 @@
                   $("#btnAction").attr("onclick", "saveFile()");
                 } else {
                   if(collectorList == "vmware"){
+                    console.log(response);
                     const jsonObj = JSON.parse(response)
                     const length = Object.keys(jsonObj).length;
           

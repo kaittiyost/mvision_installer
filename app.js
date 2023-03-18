@@ -25,7 +25,7 @@ const options = {
   cert: fs.readFileSync('certs/cert.pem'),
 };
 
-var server = https.createServer(options,app).listen(PORT, function(){
+var server = http.createServer(app).listen(PORT, function(){
   console.log("MVSION Installer Status [OK]\nOpen a browser to https://localhost:" + PORT+"/login");
 });
 
@@ -134,6 +134,9 @@ app.get('/prometheus',(req,res) => {
 })
 app.get('/grafana',(req,res) => {
   res.render('pages/grafanaConfig')
+})
+app.get('/createReport',(req,res) => {
+  res.render('pages/createReport')
 })
 app.get('/LinuxConfig/ReadFile',(req,res) => {
   var inventory = fs.readFileSync('resources/inventory/linux_host.json','utf8'); 
@@ -634,6 +637,7 @@ app.post('/AddGrafanaDatasource',(req,res) => {
       }
     })
 })
+
 
 app.get('/login',(req,res) => {
     const cmd = "curl -k -X POST -H 'Accept:application/json' --basic -u intern@vsphere.local:1qaz2wsx#EDC \

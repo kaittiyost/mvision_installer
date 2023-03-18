@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+</head>
+<body class="g-sidenav-show   bg-gray-100">
+  <div class="min-height-300 bg-dark position-absolute w-100"></div>
+  <%- include('../partials/sidebar') %>
+  <main class="main-content position-relative border-radius-lg ">
+    <%- include('../partials/nav') %>
+    <div class="container-fluid py-4">
+        <h3 class="text-white">New Report</h3>
+      <div class="row">
+        <div class="col-lg-12 mb-lg-0 mb-4">
+            <div class="card">
+              <div class="card-header pb-0 p-3">
+                <h6 class="mb-2">Grafana Dashboard (Mvision)</h6>
+                
+              </div>
+              <div class="card-body">
+                <div>
+                    Choose Dashboard
+                    <select name="" id="">
+                        <option value="">Windows-Dashbaord</option>
+                        <option value="">Redhat7-Dashbaord</option>
+                    </select>
+                </div>
+                <br>
+                <iframe src="http://10.4.160.171:3000/d-solo/IV0hu1m7z/windows-exporter-dashboard?orgId=1&refresh=5s&from=1679110385934&to=1679113985934&panelId=40" width="auto" height="200" frameborder="0"></iframe>
+              </div>
+            </div>
+          </div>
+      </div>
+      <center>
+        <button class="btn btn-danger mt-2">+</button>
+      </center>
+ 
+ 
+  <%- include('../partials/footer') %>

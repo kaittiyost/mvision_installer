@@ -33,9 +33,8 @@
                                       ACTIONS
                                     </button>
                                     <ul class="dropdown-menu bg-light">
-                                      <li><a class="dropdown-item"  data-bs-toggle="modal" data-bs-target="#newGroupModal" href="#">Stop</a></li>
-                                      <li><a class="dropdown-item" id="btnInstall" onclick="RestartContainer('prometheus')" href="#">Restart</a></li>
-                                      <li><a class="dropdown-item"  data-bs-toggle="modal" data-bs-target="#newGroupModal" href="#">Remove</a></li>
+                                      <li><a class="dropdown-item" id="btnInstall" onclick="RestartContainer('${service_name}'')" href="#">Restart</a></li>
+                                      <li><a class="dropdown-item" id="btnInstall" onclick="StopContainer('${service_name}'')" href="#">Stop & Remove</a></li>
                                     </ul>
                                 </div>  
                             </td>
@@ -610,6 +609,30 @@
               });
 
               $('#EngineerModeJobConfig').modal('show')
+          }
+
+          function RestartContainer(container_name) {
+            
+            $.ajax({
+              url: "/DockerRestart",
+              method: "POST",
+              data:{container_name : container_name},
+              success: function (response) {
+                //console.log(response);
+                $('#output').append(response)
+                Swal.fire({
+                    icon: 'success',
+                    title: `${container_name} is restarted.`,
+                    text: response,
+                  }).then(()=>{
+                    location.reload();
+                  })
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
+            });
           }
 
           function RestartContainer(container_name) {

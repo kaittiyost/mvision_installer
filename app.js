@@ -25,7 +25,7 @@ const options = {
   cert: fs.readFileSync('certs/cert.pem'),
 };
 
-var server = http.createServer(app).listen(PORT, function(){
+var server = https.createServer(options,app).listen(PORT, function(){
   console.log("MVSION Installer Status [OK]\nOpen a browser to https://localhost:" + PORT+"/login");
 });
 

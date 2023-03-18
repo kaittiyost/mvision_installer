@@ -345,26 +345,32 @@
                   $("#btnAction").attr("onclick", "saveFile()");
                 } else {
                   if(collectorList == "vmware"){
+                    $("#table_body").empty()
                     console.log(response);
                     const jsonObj = JSON.parse(response)
                     const length = Object.keys(jsonObj).length;
           
                     const myDict = jsonObj;
-
+                    let row=0
                     for (const [ip, credentials] of Object.entries(myDict)) {
                       $("#table_body").append(
                         `
-                              <tr>
-                                  <td>${ip}</td>
-                                  <td>${ credentials["PORT"]}</td>
+                              <tr id="row${row}">
+                                  <td>
+                                    <input type="text" id="input_row${row}col0" disabled class="form-control" value="${ip}">
+                                  </td>
+                                  <td>
+                                    <input type="text" id="input_row${row}col1" disabled class="form-control" value="${ credentials["PORT"]}">
+                                  </td>
                                   <td><a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${row})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a></td>
                               </tr>
                               `
                       );
-
+                              row++;
                     }
                   }else{
-                    const toJson = JSON.parse(response);
+
+                  const toJson = JSON.parse(response);
                   
                   dataLength = Object.keys(toJson).length;
                   
@@ -392,7 +398,7 @@
                       }">
                                 </td>
                                 <td id="row${i}col3">
-                                    <a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${row})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
+                                    <a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${i})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
                                 </td>
                             </tr>`
                     );
@@ -466,6 +472,7 @@
           function saveFile() {
             let new_job ;
             let job_name = $('#job_name_current').val()
+            console.log(job_name);
             console.log("row = " + row);
             console.log("connter = " + counter);
             if (row == 0) {
@@ -477,8 +484,7 @@
                 if ($(`#input_row${c}col${0}`).val() === undefined) {
                 } else {
                   let host  = "'"+$(`#input_row${c}col${0}`).val()+":";
-                  let port = $(`#input_row${c}col${1}`).val()+"'";
-
+                  let port = $(`#input_row${c}col${1}`).val()+"'";    
                   // for write json file
                   let hostjson  = $(`#input_row${c}col${0}`).val()+":";
                   let portjson = $(`#input_row${c}col${1}`).val();
@@ -486,12 +492,32 @@
                   key_array.push(`${host+port}`);
                   key_array_temp.push(`${hostjson+portjson}`);
                   console.log(key_array);
-                  new_job = ` 
+
+                  if(job_name.toLowerCase() == "vmware"){
+                    new_job = `
+  - job_name: '${job_name}'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets:
+        - ${key_array}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: ${key_array}
+
+                    `;
+                  }else{
+                    new_job = ` 
                   \n
-  - job_name: ${job_name} 
+  - job_name: '${job_name}'
     scrape_interval: 5s
     static_configs:
       - targets: [${key_array}]`;
+                  }
+
 
                   jsonData['job_name'] = job_name;
                   jsonData['targets'] = key_array;
@@ -504,8 +530,8 @@
                 }
               }
             }
-            //console.log(new_job);
-            //console.log(jsonData); //obj
+            console.log(new_job);
+            console.log(jsonData); //obj
 
             $.ajax({
               url: "/PrometheusConfig/SaveFile",
@@ -533,7 +559,7 @@
           function removeRow(row){
             console.log('removeRow '+row);
             counter = counter - 1; 
-            $(`#row${row-1}`).remove(0); 
+            $(`#row${row}`).remove(0); 
        
             delete jsonData[`row${row-1}`];
             console.log(jsonData);

@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  grafana:
+    image: grafana/grafana:8.2.7
+    ports:
+      - '3000:3000'
+    environment:
+      GF_RENDERING_SERVER_URL: http://renderer:8081/render
+      GF_RENDERING_CALLBACK_URL: http://grafana:3000/
+      GF_LOG_FILTERS: rendering:debug
+    depends_on:
+      - renderer
+
+  renderer:
+    image: grafana/grafana-image-renderer:3.5.0
+    container_name: grafana_renderer
+    ports:
+      - 8081
+    environment:
+      ENABLE_METRICS: 'true'

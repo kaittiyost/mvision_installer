@@ -20,15 +20,14 @@
               const length = Object.keys(jsonObj).length;
     
               const myDict = jsonObj;
-
+              console.log(response);
               for (const [ip, credentials] of Object.entries(myDict)) {
                 $("#table_docker_reunned").append(
                   `
                         <tr>
-                            <th scope="row">${1}</th>
                             <td>${ip}</td>
                             <td>${ credentials["PORT"]}</td>
-                            <td> <button class="btn btn-outline-primary" onclick="CurlExporter()">Curl</button></td>
+                            <td>${ credentials["USERNAME"]}</td>
                         </tr>
                         `
                 );
@@ -83,10 +82,9 @@
               <div class="table-responsive p-3">
                 <table class="table align-items-center">
                     <thead>
-                        <th>#</th>
                         <th>HostIP</th>
                         <th>Port</th>
-                        <th>Action</th>
+                        <th>Username</th>
                     </thead>
                     <tbody id="table_docker_reunned">
                     </tbody>

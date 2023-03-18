@@ -474,6 +474,30 @@
             });
           }
 
+          function StopContainer(container_name) {
+            
+            $.ajax({
+              url: "/DockerStop",
+              method: "POST",
+              data:{container_name : container_name},
+              success: function (response) {
+                //console.log(response);
+                $('#output').append(response)
+                Swal.fire({
+                    icon: 'success',
+                    title: `${container_name} is stopped.`,
+                    text: response,
+                  }).then(()=>{
+                    location.reload();
+                  })
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
+            });
+          }
+
         </script>
         <%- include('../partials/footer') %>
       </div>

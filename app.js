@@ -641,6 +641,23 @@ app.post('/DockerRestart',(req,res) => {
       }
     })
 })
+app.post('/DockerStop',(req,res) => {
+  const container_name = req.body.container_name;
+  const cmd = `
+  docker rm -f ${container_name}
+  `;
+  var response;
+    subProcess.exec(cmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err)
+        res.status(500).send(stderr);
+      } else {
+        response = stdout
+        console.log(response);
+        res.status(200).send(response);
+      }
+    })
+})
 app.post('/AddGrafanaDatasource',(req,res) => {
   const data = JSON.parse(req.body.data);
   let cmd = 

@@ -560,6 +560,9 @@ app.post('/DockerRun',(req,res) => {
     const port = req.body.port;
     cmd = `docker run -d --name ${service_name} -p 0.0.0.0:${port}:8086 influxdb:1.8`;
   }
+  else if(container_name == "isi_mon"){
+    cmd = `docker run -d --name ${container_name}  alansup/${container_name}`;
+  }
   var response;
     subProcess.exec(cmd, (err, stdout, stderr) => {
       if (err) {

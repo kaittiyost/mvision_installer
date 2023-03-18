@@ -25,6 +25,7 @@
 
 <script src="/assets/sweetalert2@11.js"></script>
 
+
   <style>
     #title{
       visibility: hidden;
@@ -38,3 +39,9 @@
       transition-delay: 0.3s; */
     }
   </style>
+  <script>
+    function ActiveMenu(id){
+      localStorage.setItem('activemenu',id)
+      //$('#'+id).addClass().last('active')
+    }
+  </script>

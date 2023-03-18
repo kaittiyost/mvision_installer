@@ -301,16 +301,14 @@
                         </td>
                     </tr>`
                 )
-                let dataToJson = {}
-                dataToJson[$('#hostip').val()] = {
-                    "USERNAME":$('#username').val(),
-                    "PASSWORD":$('#password').val(),
-                    "PORT":$('#port').val()
-                }
+
                 $.ajax({
                     url: "/InfluxDBConfig/SaveFile",
                     method: "POST",
-                    data: { data: dataToJson,hostip:$('#hostip').val()},
+                    data: {
+                      service_name : service_name,
+                      port : port
+                    },
                     success: function (response) {
                         if (response == "ok") {
                         //alert("Ok");

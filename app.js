@@ -576,11 +576,10 @@ app.post('/DockerRun',(req,res) => {
 app.post('/InfluxDBConfig/SaveFile',(req,res) => {
   //let statusYML = 0;
   //let statusJSON = 0;
-  const hostip = req.body.hostip;
-  let data = req.body.data 
-  console.log(hostip);
-  console.log('data[${hostip}]...');
-  console.log(data[`${hostip}`]);
+  const service_name = req.body.service_name;
+  let port = req.body.port 
+  console.log(service_name);
+
 
   // jsonPromData.collector[jsonPromData.collector.length] = new_job_obj;
   // console.log(JSON.stringify(jsonPromData));
@@ -591,7 +590,9 @@ app.post('/InfluxDBConfig/SaveFile',(req,res) => {
   console.log(oldData);
   console.log('####################################');
 
-  oldData[`${hostip}`] = data[`${hostip}`];
+  oldData[`${service_name}`] = {
+    "port":port
+  };
 
   console.log("\nOld Data After...");
   console.log(oldData);

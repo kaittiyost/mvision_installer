@@ -475,7 +475,7 @@
           }
 
           function StopContainer(container_name) {
-            
+            $('#output').append(`${container_name} stopping...`)
             $.ajax({
               url: "/DockerStop",
               method: "POST",

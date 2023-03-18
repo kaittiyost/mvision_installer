@@ -597,11 +597,11 @@ app.post('/InfluxDBConfig/SaveFile',(req,res) => {
   console.log("\nOld Data After...");
   console.log(oldData);
   console.log('####################################');
-  // fs.writeFile(__dirname+'/resources/influxdb/influxdb.json', JSON.stringify(oldData) , function (err) {
-  //   if (err) throw err;
-  //   console.log('New text appended to file vsphere_host.json!');
-  //   statusJSON = 1;
-  // });
+  fs.writeFile(__dirname+'/resources/influxdb/influxdb.json', JSON.stringify(oldData) , function (err) {
+    if (err) throw err;
+    console.log('New text appended to file influxdb.json!');
+    statusJSON = 1;
+  });
 
   res.status(200).send('ok')
 
@@ -643,9 +643,7 @@ app.post('/DockerRestart',(req,res) => {
 })
 app.post('/DockerStop',(req,res) => {
   const container_name = req.body.container_name;
-  const cmd = `
-  docker rm -f ${container_name}
-  `;
+  const cmd = `docker rm -f ${container_name}`;
   var response;
     subProcess.exec(cmd, (err, stdout, stderr) => {
       if (err) {

@@ -573,6 +573,39 @@ app.post('/DockerRun',(req,res) => {
     })
 })
 
+app.post('/InfluxDBConfig/SaveFile',(req,res) => {
+  //let statusYML = 0;
+  //let statusJSON = 0;
+  const hostip = req.body.hostip;
+  let data = req.body.data 
+  console.log(hostip);
+  console.log('data[${hostip}]...');
+  console.log(data[`${hostip}`]);
+
+  // jsonPromData.collector[jsonPromData.collector.length] = new_job_obj;
+  // console.log(JSON.stringify(jsonPromData));
+
+  // Save .json
+  var oldData = JSON.parse(fs.readFileSync('resources/influxdb/influxdb.json','utf8')); 
+  console.log("Old Data Before...");
+  console.log(oldData);
+  console.log('####################################');
+
+  oldData[`${hostip}`] = data[`${hostip}`];
+
+  console.log("\nOld Data After...");
+  console.log(oldData);
+  console.log('####################################');
+  // fs.writeFile(__dirname+'/resources/influxdb/influxdb.json', JSON.stringify(oldData) , function (err) {
+  //   if (err) throw err;
+  //   console.log('New text appended to file vsphere_host.json!');
+  //   statusJSON = 1;
+  // });
+
+  res.status(200).send('ok')
+
+})
+
 app.get('/DockerPS',(req,res) => {
   const cmd = `
   docker ps

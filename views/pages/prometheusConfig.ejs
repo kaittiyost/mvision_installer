@@ -37,7 +37,7 @@
                         <tr>
                             <th scope="row">${i + 1}</th>
                             <td>${toJson.collectors[i].job_name}</td>
-                            <td> <button class="btn btn-primary" onclick="ReadFileByName('${toJson.collectors[i].job_name}',${i})">View</button></td>
+                            <td> <button class="btn btn-outline-dark" onclick="ReadFileByName('${toJson.collectors[i].job_name}',${i})">View</button></td>
                         </tr>
                         `
                 );
@@ -151,7 +151,7 @@
                   </ul>
                 </div>
                 
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newGroupModal">
+                <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#newGroupModal">
                   New Group
                 </button>
                 <br>
@@ -287,7 +287,6 @@
               },
             });
           }
-
 
           function createNewGroup(){
             
@@ -555,7 +554,6 @@
             });
           }
 
-
           function removeRow(row){
             console.log('removeRow '+row);
             counter = counter - 1; 
@@ -564,7 +562,6 @@
             delete jsonData[`row${row-1}`];
             console.log(jsonData);
           }
-
 
           function ReadFileByName(JobName,index){
               $('#btn_add_host').attr('disabled',true)
@@ -580,8 +577,7 @@
                   } else {
                     const prepareJson = JSON.stringify(response);
                     const toJson = JSON.parse(prepareJson)
-                    //console.log(JSON.parse(toJson));
-                   
+         
                     for (i = 0; i < toJson.targets.length; i++) {
                       const host_ip = toJson.targets[i].split(":")[0];
                       const port = toJson.targets[i].split(":")[1];
@@ -612,11 +608,9 @@
                 url: "/PrometheusConfig/ReadFileYML",
                 method: "GET",
                 success: function (response) {
-                  console.log(response);
                   if (response == "empty") {
 
                   } else {
-                    console.log(response);
                     $('textarea#text_editor').val(response)
                   }
                 },
@@ -635,9 +629,7 @@
                 success: function (response) {
                   console.log(response);
                   if (response == "empty") {
-
                   } else {
-                    console.log(response);
                     $('textarea#text_editor_job').val(response)
                   }
                 },
@@ -645,12 +637,11 @@
                   console.error(xhr.responseText);
                 },
               });
-
               $('#EngineerModeJobConfig').modal('show')
           }
 
           function RestartContainer(container_name) {
-            
+            $('#output').append(`${container_name} restarting...`)
             $.ajax({
               url: "/DockerRestart",
               method: "POST",
@@ -672,7 +663,6 @@
               },
             });
           }
-
 
           function AddDatasource(datasource_type){
             let datasource_config = JSON.stringify({

@@ -3,10 +3,8 @@
   <head>
     <%- include('../partials/head') %>
     <script>
-          window.onload = function () {
-
-            localStorage.setItem('activemenu','menuHomepage')
-
+         $( document ).ready(function() {
+            alert('DockerPS')
             $.ajax({
               url: "/DockerPS",
               method: "GET",
@@ -18,7 +16,8 @@
                 console.error(xhr.responseText);
               },
             });
-          }
+         })
+        localStorage.setItem('activemenu','menuHomepage')
     </script>
   </head>
   <body class="g-sidenav-show bg-secondary">

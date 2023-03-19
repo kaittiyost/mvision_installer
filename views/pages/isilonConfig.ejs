@@ -232,6 +232,8 @@
                 influxPort : influxPort
               } },
               success: function (response) {
+                $('#newGroupModal').modal('hide')
+                $('#output').append('\n'+response)
                 if (response == "ok") {
                     $.ajax({
                       url: "/DockerRun",

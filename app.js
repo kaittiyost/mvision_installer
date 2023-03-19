@@ -588,9 +588,11 @@ app.post('/DockerRun',(req,res) => {
     cmd = `docker run -d --name ${service_name} -p 0.0.0.0:${port}:8086 influxdb:1.8`;
   }
   else if(container_name == "isi_mon"){
+
     cmd = `docker run -d --name ${container_name}  \
     -v $(pwd)/resources/isilon/temp/isi_data_insights_d.cfg:/isi_data_insights_d.cfg \
     alansup/${container_name}`;
+    console.log(cmd);
   }
   var response;
     subProcess.exec(cmd, (err, stdout, stderr) => {

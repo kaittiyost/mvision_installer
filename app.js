@@ -378,6 +378,7 @@ app.post('/isilonConfig/CreateConfigFile',(req,res) => {
   console.log(ipAddress);
   console.log(cfg);
   const cmd = `
+  chmod 777 $(pwd)/resources/isilon/* ;
   cp $(pwd)/resources/isilon/isi_data_insights_d.cfg $(pwd)/resources/isilon/temp/isi_data_insights_d.cfg; \
   cd resources/isilon/temp;
   sed -i'.cfg' -e 's/<ISILONCLUSTER>/${cfg.username}:${cfg.password}@${cfg.hostip}:False/g' \

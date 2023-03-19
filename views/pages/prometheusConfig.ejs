@@ -10,7 +10,7 @@
       let counter = 0;
 
       var targets_arr = [];
-      window.onload = function () {
+      $( document ).ready(function() {
         $('#btnAction').attr('disabled',true)
         $.ajax({
           url: "/PrometheusConfig/ReadFile",
@@ -51,7 +51,7 @@
             console.error(xhr.responseText);
           },
         });
-      };
+      })
     </script>
   </head>
   <body class="g-sidenav-show bg-gray-100">

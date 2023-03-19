@@ -6,7 +6,7 @@
       let jsonData = {};
       let dataLength = 0;
 
-      window.onload = function () {
+      $( document ).ready(function() {
         $('#btnAction').attr('disabled',true)
         $.ajax({
           url: "/InfluxDBConfig/ReadFile",
@@ -49,7 +49,7 @@
             console.error(xhr.responseText);
           },
         });
-      };
+      });
     </script>
   </head>
   <body class="g-sidenav-show bg-gray-100">

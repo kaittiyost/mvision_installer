@@ -2,6 +2,57 @@
 <html lang="en">
   <head>
     <%- include('../partials/head') %>
+    <script>
+      let jsonData = {};
+      let dataLength = 0;
+
+      $( document ).ready(function() {
+        $('#btnAction').attr('disabled',true)
+        $.ajax({
+          url: "/IsilonConfig/ReadFile",
+          method: "GET",
+          success: function (response) {
+            if (response == "empty") {
+
+            } else {
+
+              const jsonObj = JSON.parse(response)
+              const length = Object.keys(jsonObj).length;
+    
+              const myDict = jsonObj;
+              console.log(response);
+              for (const [service_name, credentials] of Object.entries(myDict)) {
+                $("#table_docker_reunned").append(
+                  `
+                        <tr>
+                          <td>${ credentials["HOST"]}</td>
+                            <td>${ credentials["PORT"]}</td>
+                            <td>${ credentials["USERNAME"]}</td>
+                            <td>${service_name}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                      ACTIONS
+                                    </button>
+                                    <ul class="dropdown-menu bg-light">
+                                      <li><a class="dropdown-item" id="btnInstall" onclick="RestartContainer('${service_name}')" href="#">Restart</a></li>
+                                      <li><a class="dropdown-item" id="btnInstall" onclick="StopContainer('${service_name}')" href="#">Stop & Remove</a></li>
+                                    </ul>
+                                </div>  
+                            </td>
+                        </tr>
+                        `
+                );
+
+              }
+            }
+          },
+          error: function (xhr, status, error) {
+            console.error(xhr.responseText);
+          },
+        });
+      })
+    </script>
   </head>
   <body class="g-sidenav-show bg-gray-100">
     <div class="min-height-300 bg-dark position-absolute w-100"></div>
@@ -10,7 +61,7 @@
       <%- include('../partials/nav') %>
       <div class="container-fluid py-4">
         <div class="row mt-4">
-          <div class="col-lg-5 mb-lg-0 mb-4">
+          <div class="col-lg-7 mb-lg-0 mb-4">
             <div class="card">
               <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
@@ -41,11 +92,12 @@
                </div>
               </div>
               <div class="table-responsive p-3">
-                <table class="table align-items-center">
+                <table class="table align-items-center" style="text-align: center;">
                     <thead>
-                        <th>#</th>
-                        <th>HostIP</th>
+                        <th>Host IP</th>
                         <th>Port</th>
+                        <th>User</th>
+                        <th>ServiceName</th>
                         <th>Action</th>
                     </thead>
                     <tbody id="table_docker_reunned">
@@ -54,10 +106,10 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-7 mb-lg-0 mb-4">
+          <div class="col-lg-5 mb-lg-0 mb-4">
             <div class="card">
               <div class="card-header pb-0 p-3">
-                <h6 class="mb-2">Isilon Cluster</h6>
+                <h6 class="mb-2">Isilon Cluster Management</h6>
                 <div class="btn-group">
                     <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                       ACTIONS
@@ -73,7 +125,7 @@
                       </a>
               </div>
               <div class="card-body">
-                <table class="table table-striped table-hover" id="tableGroup">
+                <!-- <table class="table table-striped table-hover" id="tableGroup">
                   <thead>
                     <tr>
                       <th scope="col">#</th>
@@ -84,7 +136,7 @@
                     </tr>
                   </thead>
                   <tbody id="tableBodyHost"></tbody>
-                </table>
+                </table> -->
               </div>
             </div>
           </div>
@@ -239,7 +291,8 @@
                       url: "/DockerRun",
                       method: "POST",
                       data:{
-                        container_name : container_name
+                        container_name : container_name,
+                        influxPort : influxPort
                         },
                       success: function (response) {
                         console.log(response);
@@ -578,31 +631,27 @@
             });
           }
 
-          function AddDatasource(datasource_type){
-            let datasource_config = JSON.stringify({
-                "name": "MVISION InfluxDB",
-                "type": `${datasource_type}`,
-                "url": "http://10.4.160.170:8086",
-                "access": "proxy",
-                "basicAuth": false
-              });
-
-            var settings = {
-              "url": "/AddGrafanaDatasource",
-              "method": "POST",
-              "timeout": 0,
-              "data": {data : datasource_config}
-            };
-
-            $.ajax(settings).done(function (response) {
-              console.log(response);    
+          function StopContainer(container_name) {
+            $('#output').append(`${container_name} stopping...`)
+            $.ajax({
+              url: "/DockerStop",
+              method: "POST",
+              data:{container_name : container_name},
+              success: function (response) {
+                //console.log(response);
                 $('#output').append(response)
                 Swal.fire({
                     icon: 'success',
-                    title: `New Datasource is added.`,
-                    text: "MVISION InfluxDB DBtype: InfluxDB",
-                })  
-              
+                    title: `${container_name} is stopped.`,
+                    text: response,
+                  }).then(()=>{
+                    location.reload();
+                  })
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
             });
           }
 

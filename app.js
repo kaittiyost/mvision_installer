@@ -351,7 +351,17 @@ app.post('/WindowsConfig/SaveFile',(req,res) => {
     console.log(error);
   }
 })
+app.get('/isilonConfig/ReadFile',(req,res) => {
+  var config = fs.readFileSync(__dirname+'/resources/isilon/isilon.json','utf8'); 
 
+  let data ;
+  if(config == ""){
+    data = 'empty';
+  }else{
+    data = config;
+  }
+  res.status(200).send(data);
+})
 app.get('/isilonConfig/ReadFileCFG',(req,res) => {
   var config = fs.readFileSync(__dirname+'/resources/isilon/isi_data_insights_d.cfg','utf8'); 
 
@@ -590,9 +600,9 @@ app.post('/DockerRun',(req,res) => {
     cmd = `docker run -d --name ${service_name} -p 0.0.0.0:${port}:8086 influxdb:1.8`;
   }
   else if(container_name == "isi_mon"){
-
-    cmd = `docker run -d --name ${container_name}  \
-    -v $(pwd)/resources/isilon/temp/isi_data_insights_d.cfg:/isi_data_insights_d.cfg \
+    const influxPort = req.body.influxPort;
+    cmd = `docker run -d --name ${container_name+'_'+influxPort}  \
+    -v $(pwd)/resources/isilon/temp/isi_data_insights_d.cfg:/app/isi_data_insights_d.cfg \
     alansup/${container_name}`;
     console.log(cmd);
   }

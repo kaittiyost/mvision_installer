@@ -69,6 +69,7 @@
                     <div class=" col-1">
                       <a class="btn btn-icon-only btn-rounded btn-outline-dark mb-0 me-3 btn-md d-flex align-items-center justify-content-center" href="/"><i class="ni ni-bold-left" aria-hidden="true"></i></a> 
                     </div>
+                    <input type="hidden" value="<%= IPADDR %>" id="localIP">
                     <div class="col-3 p-2">
                     
                         <img
@@ -482,7 +483,7 @@
               for (c = 0; c <= counter; c++) {
                 if ($(`#input_row${c}col${0}`).val() === undefined) {
                 } else {
-                  let host  = "'"+$(`#input_row${c}col${0}`).val()+":";
+                  let host  = "'"+$(`#localIP`).val()+":";
                   let port = $(`#input_row${c}col${1}`).val()+"'";    
                   // for write json file
                   let hostjson  = $(`#input_row${c}col${0}`).val()+":";

@@ -89,7 +89,7 @@
             </div>
           </div>
           <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-            <div class="card" onclick="reDirect('prometheus')">
+            <div class="card" onclick="reDirect('prometheus','<%= IPADDR %>')">
               <div class="card-body p-3">
                 <div class="row">
                   <div class="col-8">
@@ -116,7 +116,7 @@
             </div>
           </div>
           <div class="col-xl-3 col-sm-6">
-            <div class="card" onclick="reDirect('grafana')">
+            <div class="card" onclick="reDirect('grafana','<%= IPADDR %>')">
               <div class="card-body p-3">
                 <div class="row">
                   <div class="col-8">
@@ -226,12 +226,12 @@
           const socket = io();
         </script>
         <script>
-          function reDirect(path) {
+          function reDirect(path,ipaddress) {
 
             if(path == 'prometheus'){
-              window.open('http://10.4.160.170:9090', 'name','width=1200,height=650');
+              window.open('http://'+ipaddress+':9090', 'name','width=1200,height=650');
             }else if(path == 'grafana'){
-              window.open('https://10.4.160.170:3002', 'name','width=1200,height=650');
+              window.open('https://'+ipaddress+':3002', 'name','width=1200,height=650');
             }else{
               window.location.href = path;
             }

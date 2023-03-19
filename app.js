@@ -132,7 +132,10 @@ app.get('/influxdb',(req,res) => {
   res.render('pages/influxdbConfig')
 })
 app.get('/prometheus',(req,res) => {
-  res.render('pages/prometheusConfig')
+  ipAddress = IP.address();
+  res.render('pages/prometheusConfig',{
+    IPADDR : ipAddress
+  })
 })
 app.get('/grafana',(req,res) => {
   res.render('pages/grafanaConfig')

@@ -2,6 +2,8 @@ const express = require('express')
 //const app = express()
 const PORT = 3009
 const path = require("path")
+const IP = require('ip');
+
 var fs = require('fs'); 
 
 const { networkInterfaces } = require('os');
@@ -82,15 +84,15 @@ app.get('/login',(req,res) => {
   res.render('pages/login')
 })
 app.get('/',(req,res) => {
-  Object.keys(ifaces).forEach((ifname) => {
-    ifaces[ifname].forEach((iface) => {
-      if (iface.family === 'IPv4') {
-        console.log(iface);
-        ipAddress = iface.address;
-      }
-    });
-  });
-  
+  // Object.keys(ifaces).forEach((ifname) => {
+  //   ifaces[ifname].forEach((iface) => {
+  //     if (iface.family === 'IPv4') {
+  //       console.log(iface);
+  //       ipAddress = iface.address;
+  //     }
+  //   });
+  // });
+  ipAddress = IP.address();
   console.log(`Server IP address is ${ipAddress}`);
 
   var linuxHost = JSON.parse(fs.readFileSync('resources/inventory/linux_host.json','utf8')); 
@@ -162,8 +164,9 @@ app.get('/WindowsConfig/ReadFile',(req,res) => {
 })
 
 app.get('/InfluxDBConfig/ReadFile',(req,res) => {
+  console.log('/InfluxDBConfig/ReadFile');
   var config = fs.readFileSync('resources/influxdb/influxdb.json','utf8'); 
-  //console.log(inventory);
+  console.log(config);
   let data ;
   if(config == ""){
     data = 'empty';
@@ -369,6 +372,30 @@ app.post('/isilonConfig/EnSaveFile',(req,res) => {
     res.status(200).send('ok')
   });
 })
+app.post('/isilonConfig/CreateConfigFile',(req,res) => {
+  let cfg = req.body.cfg 
+  ipAddress = IP.address();
+  console.log(ipAddress);
+  console.log(cfg);
+  const cmd = `
+  cp $(pwd)/resources/isilon/isi_data_insights_d.cfg $(pwd)/resources/isilon/temp/isi_data_insights_d.cfg; \
+  cd resources/isilon/temp;
+  sed -i'.cfg' -e 's/<ISILONCLUSTER>/${cfg.username}:${cfg.password}@${cfg.hostip}:False/g' \
+  -e 's/<InfluxHOST>/${ipAddress}/g'  -e 's/<InfluxPORT>/${cfg.influxPort}/g' *;
+  `;
+  var response;
+    subProcess.exec(cmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err)
+        res.status(500).send(stderr);
+      } else {
+        response = stdout
+        console.log(response);
+        res.status(200).send('ok');
+      }
+    })
+
+})
 
 app.get('/VmwareConfig/ReadFileJSON',(req,res) => {
   var inventory = fs.readFileSync('resources/vmware/vsphere_host.json','utf8'); 
@@ -561,7 +588,9 @@ app.post('/DockerRun',(req,res) => {
     cmd = `docker run -d --name ${service_name} -p 0.0.0.0:${port}:8086 influxdb:1.8`;
   }
   else if(container_name == "isi_mon"){
-    cmd = `docker run -d --name ${container_name}  alansup/${container_name}`;
+    cmd = `docker run -d --name ${container_name}  \
+    -v $(pwd)/resources/isilon/temp/isi_data_insights_d.cfg:/isi_data_insights_d.cfg \
+    alansup/${container_name}`;
   }
   var response;
     subProcess.exec(cmd, (err, stdout, stderr) => {

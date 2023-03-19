@@ -2,46 +2,6 @@
 <html lang="en">
   <head>
     <%- include('../partials/head') %>
-    <script>
-      let jsonData = {};
-      let dataLength = 0;
-
-      window.onload = function () {
-        $('#btnAction').attr('disabled',true)
-        $.ajax({
-          url: "/VmwareConfig/ReadFile",
-          method: "GET",
-          success: function (response) {
-            if (response == "empty") {
-
-            } else {
-
-              const jsonObj = JSON.parse(response)
-              const length = Object.keys(jsonObj).length;
-    
-              const myDict = jsonObj;
-
-              for (const [ip, credentials] of Object.entries(myDict)) {
-                $("#table_docker_reunned").append(
-                  `
-                        <tr>
-                            <th scope="row">${1}</th>
-                            <td>${ip}</td>
-                            <td>${ credentials["PORT"]}</td>
-                            <td> <button class="btn btn-outline-primary" onclick="CurlExporter()">Curl</button></td>
-                        </tr>
-                        `
-                );
-
-              }
-            }
-          },
-          error: function (xhr, status, error) {
-            console.error(xhr.responseText);
-          },
-        });
-      };
-    </script>
   </head>
   <body class="g-sidenav-show bg-gray-100">
     <div class="min-height-300 bg-dark position-absolute w-100"></div>
@@ -69,7 +29,7 @@
                     </div>
                     <div class=" col-7">
                       <h4>DELL Isilon Config</h4>
-                      Support : InfluxDB                
+                      Support : InfluxDB 1.8                
                     </div>
                   </div>
                 </div>
@@ -103,7 +63,7 @@
                       ACTIONS
                     </button>
                     <ul class="dropdown-menu bg-light">
-                      <li><a class="dropdown-item text-dark"  data-bs-toggle="modal" data-bs-target="#newGroupModal" href="#">Run Isilon</a></li>
+                      <li><a class="dropdown-item text-dark"  onclick="showModal()" href="#">Run Isilon</a></li>
                       <li><a class="dropdown-item text-dark" id="btnInstall" onclick="RestartContainer('prometheus')" href="#">Restart Isilon</a></li>
                     </ul>
                   </div>
@@ -170,6 +130,11 @@
                         <td><input type="number" class="form-control" value="8080" id="port"></td>
                     </tr>
                    </table>
+                   <br>
+                   Choose InfluxDB :
+                   <select class="form-control" name="influxList" id="influxList">
+                    
+                   </select>
                   </div>
                 </div>
               </div>
@@ -218,67 +183,115 @@
           //   });
           // }
 
-          function RunContainer(container_name) {
-
-            // const hostip = $('#hostip').val()
-            // const username = $('#username').val()
-            // const password = $('#password').val()
-            // const port = $('#port').val()
-
-            $('#output').append(`Running Container ${container_name}.. \n`)
+          function showModal(){
             $.ajax({
-              url: "/DockerRun",
-              method: "POST",
-              data:{
-                container_name : container_name
-                },
+              url: "/InfluxDBConfig/ReadFile",
+              method: "GET",
               success: function (response) {
                 console.log(response);
-                $('#output').append(response)
+                if (response == "empty") {
 
-                $('#table_docker_reunned').append(
-                    `<tr>
-                        <td>${$('#hostip').val()}</td>
-                        <td>${$('#port').val()}</td>
-                        <td>
-                            <button class="btn btn-primary" onclick="CurlExporter('vmware_exporter')">Run</button>
-                        </td>
-                    </tr>`
-                )
-                // let dataToJson = {}
-                // dataToJson[$('#hostip').val()] = {
-                //     "USERNAME":$('#username').val(),
-                //     "PASSWORD":$('#password').val(),
-                //     "PORT":$('#port').val()
-                // }
-                // $.ajax({
-                //     url: "/VmwareConfig/SaveFile",
-                //     method: "POST",
-                //     data: { data: dataToJson,hostip:$('#hostip').val()},
-                //     success: function (response) {
-                //         if (response == "ok") {
-                //         //alert("Ok");
-                //         Swal.fire({
-                //             icon: 'success',
-                //             title: 'Containers is ran.',
-                //             text: 'Successfully run container vmware_exporter.',
-                //         }).then(()=>{
-                //             location.reload();
-                //         })
-                //         }
-                //     },
-                //     error: function (xhr, status, error) {
-                //         console.error(xhr.responseText);
-                //     },
-                //     });
+                } else {
 
+                  const jsonObj = JSON.parse(response)
+                  const myDict = jsonObj;
+                    let counter = 1;
+                  for (const [service_name, credentials] of Object.entries(myDict)) {
+                    $('#influxList').append(
+                      `<option value="${credentials['port']}">${credentials['port']}</option>`
+                    )
+                  }
+                }
               },
               error: function (xhr, status, error) {
                 console.error(xhr.responseText);
-                $('#output').append(xhr.responseText)
               },
             });
 
+            $('#newGroupModal').modal('show')
+          }
+
+          function RunContainer(container_name) {
+
+            const hostip = $('#hostip').val()
+            const username = $('#username').val()
+            const password = $('#password').val()
+            const port = $('#port').val()
+            const influxPort = $('#influxList').val()
+            //[username2:password2]@<ip-or-host-address2>[:True|False]
+            //console.log(`${username}:${password}@${hostip}:False`);
+            $('#output').append(`Running Container ${container_name}.. \n`)
+            $.ajax({
+              url: "/isilonConfig/CreateConfigFile",
+              method: "POST",
+              data: { cfg: {
+                hostip :hostip,
+                username : username,
+                password : password,
+                port : port,
+                influxPort : influxPort
+              } },
+              success: function (response) {
+                if (response == "ok") {
+                    $.ajax({
+                      url: "/DockerRun",
+                      method: "POST",
+                      data:{
+                        container_name : container_name
+                        },
+                      success: function (response) {
+                        console.log(response);
+                        $('#output').append(response)
+
+                        $('#table_docker_reunned').append(
+                            `<tr>
+                                <td>${$('#hostip').val()}</td>
+                                <td>${$('#port').val()}</td>
+                                <td>
+                                    <button class="btn btn-primary" onclick="CurlExporter('isi_mon')">Run</button>
+                                </td>
+                            </tr>`
+                        )
+                        // let dataToJson = {}
+                        // dataToJson[$('#hostip').val()] = {
+                        //     "USERNAME":$('#username').val(),
+                        //     "PASSWORD":$('#password').val(),
+                        //     "PORT":$('#port').val()
+                        // }
+                        // $.ajax({
+                        //     url: "/VmwareConfig/SaveFile",
+                        //     method: "POST",
+                        //     data: { data: dataToJson,hostip:$('#hostip').val()},
+                        //     success: function (response) {
+                        //         if (response == "ok") {
+                        //         //alert("Ok");
+                        //         Swal.fire({
+                        //             icon: 'success',
+                        //             title: 'Containers is ran.',
+                        //             text: 'Successfully run container vmware_exporter.',
+                        //         }).then(()=>{
+                        //             location.reload();
+                        //         })
+                        //         }
+                        //     },
+                        //     error: function (xhr, status, error) {
+                        //         console.error(xhr.responseText);
+                        //     },
+                        //     });
+
+                      },
+                      error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                        $('#output').append(xhr.responseText)
+                      },
+                    });
+
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
           }
 
 

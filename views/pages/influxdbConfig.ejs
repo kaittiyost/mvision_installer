@@ -498,6 +498,34 @@
             });
           }
 
+          function AddDatasource(datasource_type){
+            let datasource_config = JSON.stringify({
+                "name": "InfluxDB",
+                "type": `${datasource_type}`,
+                "url": "http://10.4.160.170:8086",
+                "access": "proxy",
+                "basicAuth": false,
+                "database" : "isi_data_insights"
+              });
+
+            var settings = {
+              "url": "/AddGrafanaDatasource",
+              "method": "POST",
+              "timeout": 0,
+              "data": {data : datasource_config}
+            };
+
+            $.ajax(settings).done(function (response) {
+              console.log(response);    
+                $('#output').append(response)
+                Swal.fire({
+                    icon: 'success',
+                    title: `New Datasource is added.`,
+                    text: "MVISION Datasource DBtype: Prometheus",
+                })  
+              
+            });
+          }
         </script>
         <%- include('../partials/footer') %>
       </div>

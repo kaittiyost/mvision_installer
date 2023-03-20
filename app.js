@@ -427,9 +427,9 @@ app.post('/isilonConfig/CreateConfigFile',(req,res) => {
   // console.log(cfg);
   const cmd = `
   chmod 777 $(pwd)/resources/isilon/* ;
-  chmod 777 $(pwd)/resources/isilon/temp/* ;
-  cp $(pwd)/resources/isilon/isi_data_insights_d.cfg $(pwd)/resources/isilon/temp/isi_data_insights_d.cfg; \
-  cd resources/isilon/temp;
+  chmod 777 $(pwd)/resources/isilon/temps/* ;
+  cp $(pwd)/resources/isilon/isi_data_insights_d.cfg $(pwd)/resources/isilon/temps/isi_data_insights_d.cfg; \
+  cd resources/isilon/temps;
   sed -i'.cfg' -e 's/<ISILONCLUSTER>/${cfg.username}:${cfg.password}@${cfg.hostip}:False/g' \
   -e 's/<InfluxHOST>/${ipAddress}/g'  -e 's/<InfluxPORT>/${cfg.influxPort}/g' *;
   `;
@@ -456,9 +456,9 @@ app.post('/NBUConfig/CreateConfigFile',(req,res) => {
   // console.log(cfg);
   const cmd = `
   chmod 777 $(pwd)/resources/nbu/* ;
-  chmod 777 $(pwd)/resources/nbu/temp/* ;
-  cp $(pwd)/resources/nbu/config.yaml $(pwd)/resources/nbu/temp/config.yaml; \
-  cd resources/nbu/temp;
+  chmod 777 $(pwd)/resources/nbu/temps/* ;
+  cp $(pwd)/resources/nbu/config.yaml $(pwd)/resources/nbu/temps/config.yaml; \
+  cd resources/nbu/temps;
   sed -i'.old' -e 's/<PORT>/${cfg.port}/g' \
   -e 's/<Your_NBU_Domain>/${cfg.domain}/g'  -e 's/<Your_NBU_Host>/${cfg.hostip}/g' \
   -e 's/<Your_apiKey>/${cfg.token}/g' *;
@@ -734,7 +734,7 @@ app.post('/DockerRun',(req,res) => {
   else if(container_name == "isi_mon"){
     const influxPort = req.body.influxPort;
     cmd = `docker run -d --name ${container_name+'_'+influxPort}  \
-    -v $(pwd)/resources/isilon/temp/isi_data_insights_d.cfg:/app/isi_data_insights_d.cfg \
+    -v $(pwd)/resources/isilon/temps/isi_data_insights_d.cfg:/app/isi_data_insights_d.cfg \
     alansup/${container_name}`;
    
   }
@@ -742,7 +742,7 @@ app.post('/DockerRun',(req,res) => {
     const nbuPort = req.body.nbuPort;
     cmd = `
     npm run -d --name nbu_${nbuPort} -p 0.0.0.0:${nbuPort}:2112/tcp \ 
-    -v  $(pwd)/resources/nbu/temp/config.yaml:/app/config.yaml \
+    -v  $(pwd)/resources/nbu/temps/config.yaml:/app/config.yaml \
     alansup/nbu_exporter
     `;
    

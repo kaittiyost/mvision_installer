@@ -701,7 +701,11 @@ app.post('/CurlExporter',(req,res) => {
 })
 
 app.post('/DockerRun',(req,res) => {
+  console.log(line);
+  console.log("Deocker run request.");
   const container_name = req.body.container_name;
+  console.log("Containers name : "+container_name);
+
   let cmd = "";
   if(container_name == "prometheus"){
     cmd = 'docker run -d --name prometheus  -p 9090:9090 -v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus ';
@@ -732,8 +736,9 @@ app.post('/DockerRun',(req,res) => {
     cmd = `docker run -d --name ${container_name+'_'+influxPort}  \
     -v $(pwd)/resources/isilon/temp/isi_data_insights_d.cfg:/app/isi_data_insights_d.cfg \
     alansup/${container_name}`;
-    console.log(cmd);
+   
   }
+  console.log(cmd);
   var response;
     subProcess.exec(cmd, (err, stdout, stderr) => {
       if (err) {
@@ -746,7 +751,6 @@ app.post('/DockerRun',(req,res) => {
       }
     })
 })
-
 app.post('/InfluxDBConfig/EnSaveJsonFile',(req,res) => {
   console.log(line);
   console.log("InfluxDB engineer save json file request.");
@@ -793,6 +797,8 @@ app.post('/InfluxDBConfig/SaveFile',(req,res) => {
 })
 
 app.get('/DockerPS',(req,res) => {
+  console.log(line);
+  console.log('Docker ps request.');
   const cmd = `
   docker ps
   `;
@@ -810,6 +816,8 @@ app.get('/DockerPS',(req,res) => {
 })
 
 app.post('/DockerRestart',(req,res) => {
+  console.log(line);
+  console.log('Docker restart request.');
   const container_name = req.body.container_name;
   const cmd = `
   docker restart ${container_name}
@@ -827,6 +835,8 @@ app.post('/DockerRestart',(req,res) => {
     })
 })
 app.post('/DockerStop',(req,res) => {
+  console.log(line);
+  console.log('Docker stop request.');
   const container_name = req.body.container_name;
   const cmd = `docker rm -f ${container_name}`;
   var response;
@@ -842,6 +852,8 @@ app.post('/DockerStop',(req,res) => {
     })
 })
 app.post('/AddGrafanaDatasource',(req,res) => {
+  console.log(line);
+  console.log('Add grafana datasource request.');
   const data = JSON.parse(req.body.data);
   let cmd = 
   `
@@ -857,7 +869,7 @@ app.post('/AddGrafanaDatasource',(req,res) => {
     "basicAuth": false
   }'
   `
-  console.log(cmd);
+  //console.log(cmd);
 
   var response;
     subProcess.exec(cmd, (err, stdout, stderr) => {

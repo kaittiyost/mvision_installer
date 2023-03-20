@@ -738,6 +738,15 @@ app.post('/DockerRun',(req,res) => {
     alansup/${container_name}`;
    
   }
+  else if(container_name == "nbu_exporter"){
+    const nbuPort = req.body.nbuPort;
+    cmd = `
+    npm run -d --name nbu_${nbuPort} -p 0.0.0.0:${nbuPort}:2112/tcp \ 
+    -v  $(pwd)/resources/nbu/temp/config.yaml:/app/config.yaml \
+    alansup/nbu_exporter
+    `;
+   
+  }
   console.log(cmd);
   var response;
     subProcess.exec(cmd, (err, stdout, stderr) => {

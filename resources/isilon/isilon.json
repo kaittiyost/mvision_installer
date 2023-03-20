@@ -1,8 +1,3 @@
 {
-    "isi_mon_8086":{
-        "HOST":"10.4.160.95",
-        "USERNAME" : "root",
-        "PASSWORD" : "P@ssw0rd",
-        "PORT" : "8080"
-    }
+
 }

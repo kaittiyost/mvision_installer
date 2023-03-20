@@ -9,31 +9,33 @@
       $( document ).ready(function() {
         $('#btnAction').attr('disabled',true)
         $.ajax({
-          url: "/InfluxDBConfig/ReadFile",
+          url: "/NBUConfig/ReadFile",
           method: "GET",
           success: function (response) {
-            // console.log(response);
             if (response == "empty") {
 
             } else {
 
               const jsonObj = JSON.parse(response)
+              const length = Object.keys(jsonObj).length;
+    
               const myDict = jsonObj;
-                let counter = 1;
+              console.log(response);
               for (const [service_name, credentials] of Object.entries(myDict)) {
                 $("#table_docker_reunned").append(
                   `
                         <tr>
-                            <th scope="row">${counter}</th>
+                          <td>${ credentials["HOST"]}</td>
+                            <td>${ credentials["PORT"]}</td>
+                            <td>${ credentials["DOMAIN"]}</td>
                             <td>${service_name}</td>
-                            <td>${ credentials["port"]}</td>
                             <td>
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                       ACTIONS
                                     </button>
                                     <ul class="dropdown-menu bg-light">
-                                      <li><a class="dropdown-item" id="btnInstall" onclick="RestartContainer('${service_name}'')" href="#">Restart</a></li>
+                                      <li><a class="dropdown-item" id="btnInstall" onclick="RestartContainer('${service_name}')" href="#">Restart</a></li>
                                       <li><a class="dropdown-item" id="btnInstall" onclick="StopContainer('${service_name}')" href="#">Stop & Remove</a></li>
                                     </ul>
                                 </div>  
@@ -41,7 +43,7 @@
                         </tr>
                         `
                 );
-                counter++;
+
               }
             }
           },
@@ -49,7 +51,7 @@
             console.error(xhr.responseText);
           },
         });
-      });
+      })
     </script>
   </head>
   <body class="g-sidenav-show bg-gray-100">
@@ -59,7 +61,7 @@
       <%- include('../partials/nav') %>
       <div class="container-fluid py-4">
         <div class="row mt-4">
-          <div class="col-lg-6 mb-lg-0 mb-4">
+          <div class="col-lg-7 mb-lg-0 mb-4">
             <div class="card">
               <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
@@ -70,25 +72,32 @@
                     <div class="col-3 p-2">
                     
                         <img
-                        src="/assets/img/monitor/influxdb.png"
+                        src="/assets/img/monitor/veritus.png"
                         width="80"
                         alt=""
                         srcset=""
                       />
                     </div>
                     <div class=" col-7">
-                      <h4>InfluxDB Config</h4>
-                      Support : Dell Isilon Cluster                   
+                      <h4>Veritus Netbackup Config</h4>
+                      Support : Prometheus DB                
                     </div>
                   </div>
                 </div>
               </div>
+   
+              <div class="p-3">
+               <div class="row">
+                <div id="GroupNameShow"></div>
+               </div>
+              </div>
               <div class="table-responsive p-3">
-                <table class="table align-items-center">
+                <table class="table align-items-center" style="text-align: center;">
                     <thead>
-                        <th>#</th>
-                        <th>ServiceName</th>
+                        <th>Host IP</th>
                         <th>Port</th>
+                        <th>Doamin</th>
+                        <th>ServiceName</th>
                         <th>Action</th>
                     </thead>
                     <tbody id="table_docker_reunned">
@@ -97,27 +106,26 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-6 mb-lg-0 mb-4">
+          <div class="col-lg-5 mb-lg-0 mb-4">
             <div class="card">
               <div class="card-header pb-0 p-3">
-                <h6 class="mb-2">Isilon Cluster</h6>
+                <h6 class="mb-2">NBU Cluster Management</h6>
                 <div class="btn-group">
                     <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                       ACTIONS
                     </button>
                     <ul class="dropdown-menu bg-light">
-                      <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#AddDatasourceModal"   href="#">Add Datasource</a></li>
-                      <li><a class="dropdown-item"  data-bs-toggle="modal" data-bs-target="#newGroupModal" href="#">Run InfluxDB</a></li>
-                      <!-- <li><a class="dropdown-item" id="btnInstall" onclick="RestartContainer('prometheus')" href="#">Restart InfluxDB</a></li> -->
+                      <li><a class="dropdown-item text-dark"  onclick="showModal()" href="#">Run nbu</a></li>
+                      <li><a class="dropdown-item text-dark" id="btnInstall" onclick="RestartContainer('prometheus')" href="#">Restart Isilon</a></li>
                     </ul>
                   </div>
                 <br>
-                      <a href="#" onclick="ReadFileJSON()">
+                      <a href="#" onclick="ReadFileCFG()">
                         <i class="ni ni-bold-right" aria-hidden="true"></i> Open Engineer Mode
                       </a>
               </div>
               <div class="card-body">
-                <table class="table table-striped table-hover" id="tableGroup">
+                <!-- <table class="table table-striped table-hover" id="tableGroup">
                   <thead>
                     <tr>
                       <th scope="col">#</th>
@@ -128,7 +136,7 @@
                     </tr>
                   </thead>
                   <tbody id="tableBodyHost"></tbody>
-                </table>
+                </table> -->
               </div>
             </div>
           </div>
@@ -150,7 +158,7 @@
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">InfluxDB Config</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Veritus NBU Config</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
@@ -158,90 +166,37 @@
                   <div class="row g-3 align-items-center">
                    <table>
                     <tr>
-                        <th>Image Name</th>
-                        <td><input type="text" value="influxdb:1.8" disabled class="form-control" id="image_name"></td>
+                        <th>NBU HostIP</th>
+                        <td><input type="text" class="form-control" id="hostip"></td>
                     </tr>
                     <tr>
-                        <th>Service Name</th>
-                        <td><input type="text" value="influxdb" class="form-control" id="service_name"></td>
+                        <th>NBU Domain</th>
+                        <td><input type="text" class="form-control" id="domain_name"></td>
                     </tr>
                     <tr>
-                        <th>Port</th>
-                        <td><input type="text" class="form-control" value="8086" id="port"></td>
+                        <th>Collector Port</th>
+                        <td><input type="number" class="form-control" value="2112" id="port"></td>
                     </tr>
                    </table>
+                   <br>
+                   NBU apiKey :
+                   <input type="text" class="form-control" id="nbu_token">
                   </div>
                 </div>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="RunContainer('influxdb:1.8')">Run</button>
+                <button type="button" class="btn btn-primary" onclick="RunContainer('nbu_exporter')">Run</button>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="modal fade" id="AddDatasourceModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="exampleModalLabel">Add Datasource Config</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <div class="p-3">
-                    <div class="row g-3 align-items-center">
-                     <table>
-                      <tr>
-                          <th>Datasource Name</th>
-                          <td><input type="text" value="my dataource" class="form-control" id="datasource_name"></td>
-                      </tr>
-                      <tr>
-                          <th>Host Name</th>
-                          <td><input type="text" value="http://localhost:8086" class="form-control" id="influx_hostname"></td>
-                      </tr>
-                      <tr>
-                          <th>Database</th>
-                          <td><input type="text" class="form-control" value="isi_data_insights" id="datasource_port"></td>
-                      </tr>
-                     </table>
-                    </div>
-                  </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary" onclick="AddDatasource('influxdb')">Add</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        <div class="modal modal-dialog modal-lg fade" id="EngineerMode" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal modal-dialog modal-lg fade" id="EngineerModeJobConfig" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Engineer Mode</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <div class="p-3">
-                  <div class="row g-3 align-items-center">
-                   <textarea class="form-control text-success" style="background-color: black;" name="" id="text_editor" cols="30" rows="20"></textarea>
-                  </div>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="saveJsonFileEnMode()" >Save</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- <div class="modal modal-dialog modal-lg fade" id="InfluxdbConfigModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">InfluxDB Config</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Engineer Mode NBU Config</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
@@ -253,87 +208,120 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="saveJsonFileEnMode()" >Save</button>
+                <button type="button" class="btn btn-primary" onclick="saveFileEnMode()" >Save</button>
               </div>
             </div>
           </div>
-        </div> -->
-
-        <script src="/socket.io/socket.io.js"></script>
+        </div>
         <script>
-          var socket = io();
-          // function RunPrometheusOnDocker() {
-          //   $('#btnInstall').attr('disabled',true)
-          //   $('#Console').focus()
-          //   $('#output').append('Installing...')
-          //   const command='docker run -d --name prometheus  -p 9090:9090 -v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus ';
-          //   socket.emit('dataCMD', { cmd: command});
-          //   socket.on('output', (data) => {
-          //       const output = document.getElementById('output');
-          //       output.innerHTML += data;
-          //   });
-          // }
 
-          function RunContainer(container_name) {
-            $('#newGroupModal').modal('hide')
-            const service_name = $('#service_name').val()
-            const port = $('#port').val()
-
-            $('#output').append(`Running Container ${container_name}.. \n`)
+          function showModal(){
             // $.ajax({
-            //   url: "/DockerRun",
-            //   method: "POST",
-            //   data:{
-            //     container_name : container_name,
-            //     service_name : service_name,
-            //     port : port
-            //     },
+            //   url: "/InfluxDBConfig/ReadFile",
+            //   method: "GET",
             //   success: function (response) {
             //     console.log(response);
-            //     $('#output').append(response)
+            //     if (response == "empty") {
 
-            //     $('#table_docker_reunned').append(
-            //         `<tr>
-            //             <td>${$('#hostip').val()}</td>
-            //             <td>${$('#port').val()}</td>
-            //             <td>
-            //                 <button class="btn btn-primary" onclick="CurlExporter('vmware_exporter')">Run</button>
-            //             </td>
-            //         </tr>`
-            //     )
+            //     } else {
 
-                $.ajax({
-                    url: "/InfluxDBConfig/SaveFile",
-                    method: "POST",
-                    data: {
-                      service_name : service_name,
-                      port : port
-                    },
-                    success: function (response) {
-                        if (response == "ok") {
-                        //alert("Ok");
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'InfluxDB is ran.',
-                            text: 'Successfully save file influxdb.json.',
-                        }).then(()=>{
-                            location.reload();
-                        })
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(xhr.responseText);
-                    },
-                    });
-
+            //       const jsonObj = JSON.parse(response)
+            //       const myDict = jsonObj;
+            //         let counter = 1;
+            //       for (const [service_name, credentials] of Object.entries(myDict)) {
+            //         $('#influxList').append(
+            //           `<option value="${credentials['port']}">${credentials['port']}</option>`
+            //         )
+            //       }
+            //     }
             //   },
             //   error: function (xhr, status, error) {
             //     console.error(xhr.responseText);
-            //     $('#output').append(xhr.responseText)
             //   },
             // });
 
+            $('#newGroupModal').modal('show')
           }
+
+          function RunContainer(container_name) {
+
+            const hostip = $('#hostip').val()
+            const domain = $('#domain_name').val()
+            const apiKey = $('#nbu_token').val()
+            const port = $('#port').val()
+            
+            let data = {
+                hostip :hostip,
+                domain : domain,
+                token : apiKey,
+                port : port
+              }
+            console.log(data);
+            $('#output').append(`Running Container ${container_name}.. \n`)
+            $.ajax({
+              url: "/NBUConfig/CreateConfigFile",
+              method: "POST",
+              data: { cfg: data },
+              success: function (response) {
+                $('#newGroupModal').modal('hide')
+                $('#output').append('\n'+response)
+                if (response == "ok") {
+                    // $.ajax({
+                    //   url: "/DockerRun",
+                    //   method: "POST",
+                    //   data:{
+                    //     container_name : container_name,
+                    //     influxPort : influxPort
+                    //     },
+                    //   success: function (response) {
+                    //     console.log(response);
+                    //     $('#output').append(response)
+
+                    //     $('#table_docker_reunned').append(
+                    //         `<tr>
+                    //             <td>${$('#hostip').val()}</td>
+                    //             <td>${$('#port').val()}</td>
+                    //             <td>
+                    //                 <button class="btn btn-primary" onclick="CurlExporter('isi_mon')">Run</button>
+                    //             </td>
+                    //         </tr>`
+                    //     )
+          
+                        $.ajax({
+                            url: "/NBUConfig/SaveFile",
+                            method: "POST",
+                            data: { data: {
+                                "HOST":data.hostip,
+                                "DOMAIN" : data.domain,
+                                "TOKEN" : data.token,
+                                "PORT" : data.port
+                            },service_name:`nbu_${data.port}`},
+                            success: function (response) {
+                                if (response == "ok") {
+                                alert("Ok");
+                               
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                console.error(xhr.responseText);
+                            },
+                            });
+
+                    //   },
+                    //   error: function (xhr, status, error) {
+                    //     console.error(xhr.responseText);
+                    //     $('#output').append(xhr.responseText)
+                    //   },
+                    // });
+
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
+
 
           function createNewHost(){
             
@@ -359,6 +347,33 @@
             );
             counter++;
             $('#newGroupModal').modal('hide')
+          }
+
+          function CurlExporter(ipaddress) {
+            //$('#btnInstall').attr('disabled',true)
+            $('#Console').focus()
+            $('#output').append('curl... ['+ipaddress+':9100] \n')
+            $.ajax({
+              url: "/CurlExporter",
+              method: "POST",
+              data:{ipaddr:ipaddress,os_type:'linux'},
+              success: function (response) {
+                console.log(response);
+                $('#output').append(response)
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
+            });
+          }
+
+          function configTarget(group_name){
+            $('#table_body').empty()
+            $('#btnAction').attr('disabled',false)
+            $('#GroupNameShow').html('You are creating a group : '+group_name)
+            $('#job_name_current').val(group_name)
+            // console.log(targets_arr);
           }
 
           function addRow() {
@@ -423,31 +438,10 @@
             });
           }
 
-          function ReadFileJSON(){
-              $.ajax({
-                url: "/InfluxDBConfig/ReadFile",
-                method: "GET",
-                success: function (response) {
-                  if (response == "empty") {
-
-                  } else {
-                    $('textarea#text_editor').val(response)
-                  }
-                },
-                error: function (xhr, status, error) {
-                  console.error(xhr.responseText);
-                },
-              });
-
-              $('#EngineerMode').modal('show')
-          }
-
-          function saveJsonFileEnMode() {
-
-            let config = $('#text_editor').val()
-            console.log(config);
+          function saveFileEnMode() {
+            const config = $('#text_editor_job').val()
             $.ajax({
-              url: "/InfluxDBConfig/EnSaveJsonFile",
+              url: "/NBUConfig/EnSaveFile",
               method: "POST",
               data: { cfg: config },
               success: function (response) {
@@ -456,8 +450,35 @@
                   //alert("Saved.");
                   Swal.fire({
                     icon: 'success',
+                    title: 'NBU changes saved.',
+                    text: 'Successfully saved to the nbu.json file.',
+                  }).then(()=>{
+                    location.reload();
+                  })
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
+
+          function saveJsonFileEnMode() {
+
+            let config = $('#text_editor_job').val()
+            console.log(config);
+            $.ajax({
+              url: "/VmwareConfig/EnSaveJsonFile",
+              method: "POST",
+              data: { cfg: config },
+              success: function (response) {
+                if (response == "ok") {
+                  $('#EngineerModeJobConfig').modal('hide')
+                  //alert("Saved.");
+                  Swal.fire({
+                    icon: 'success',
                     title: 'Vsphere changes saved.',
-                    text: 'Successfully saved to the influxdb.json file.',
+                    text: 'Successfully saved to the vmware_host.json file.',
                   }).then(()=>{
                     location.reload();
                   })
@@ -468,6 +489,94 @@
               },
             });
             }
+
+          var tempData = {}; // For remove '' becourse "'10.4.160.xx'"
+          function saveFile() {
+            let new_job ;
+            let job_name = $('#job_name_current').val()
+            console.log("row = " + row);
+            console.log("connter = " + counter);
+            if (row == 0) {
+                jsonData = {};
+            } else {
+              let key_array = [];
+              let key_array_temp = [];
+              for (c = 0; c <= counter; c++) {
+                if ($(`#input_row${c}col${0}`).val() === undefined) {
+                } else {
+                  let host  = "'"+$(`#input_row${c}col${0}`).val()+":";
+                  let port = $(`#input_row${c}col${1}`).val()+"'";
+
+                  // for write json file
+                  let hostjson  = $(`#input_row${c}col${0}`).val()+":";
+                  let portjson = $(`#input_row${c}col${1}`).val();
+
+                  key_array.push(`${host+port}`);
+                  key_array_temp.push(`${hostjson+portjson}`);
+                  console.log(key_array);
+                  new_job = ` 
+                  \n
+  - job_name: ${job_name} 
+    scrape_interval: 5s
+    static_configs:
+      - targets: [${key_array}]`;
+
+                  jsonData['job_name'] = job_name;
+                  jsonData['targets'] = key_array;
+
+                  tempData['job_name'] = job_name;
+                  tempData['targets'] = key_array_temp;
+
+                  $('#output').append(jsonData);
+     
+                }
+              }
+            }
+            //console.log(new_job);
+            //console.log(jsonData); //obj
+
+            $.ajax({
+              url: "/PrometheusConfig/SaveFile",
+              method: "POST",
+              data: { text: new_job , text_obj:jsonData , tempData : tempData},
+              success: function (response) {
+                if (response == "ok") {
+                  //alert("Ok");
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Job changes saved.',
+                    text: 'Successfully saved to the prometheus.yml file.',
+                  }).then(()=>{
+                    location.reload();
+                  })
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
+
+          function ReadFileCFG(){
+              $.ajax({
+                url: "/NBUConfig/ReadFile",
+                method: "GET",
+                success: function (response) {
+                  console.log(response);
+                  if (response == "empty") {
+
+                  } else {
+                    console.log(response);
+                    $('textarea#text_editor_job').val(response)
+                  }
+                },
+                error: function (xhr, status, error) {
+                  console.error(xhr.responseText);
+                },
+              });
+
+              $('#EngineerModeJobConfig').modal('show')
+          }
 
           function RestartContainer(container_name) {
             
@@ -517,34 +626,6 @@
             });
           }
 
-          function AddDatasource(datasource_type){
-            let datasource_config = JSON.stringify({
-                "name": "InfluxDB",
-                "type": `${datasource_type}`,
-                "url": "http://10.4.160.170:8086",
-                "access": "proxy",
-                "basicAuth": false,
-                "database" : "isi_data_insights"
-              });
-
-            var settings = {
-              "url": "/AddGrafanaDatasource",
-              "method": "POST",
-              "timeout": 0,
-              "data": {data : datasource_config}
-            };
-
-            $.ajax(settings).done(function (response) {
-              console.log(response);    
-                $('#output').append(response)
-                Swal.fire({
-                    icon: 'success',
-                    title: `New Datasource is added.`,
-                    text: "MVISION Datasource DBtype: Prometheus",
-                })  
-              
-            });
-          }
         </script>
         <%- include('../partials/footer') %>
       </div>

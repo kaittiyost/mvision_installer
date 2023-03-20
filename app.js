@@ -43,6 +43,8 @@ const ifaces = os.networkInterfaces();
 
 let ipAddress = '';
 
+let line = "###########################################################################";
+
 app.set('view engine','ejs')
 
 let assetsDir = path.join(__dirname,"assets")
@@ -81,17 +83,14 @@ io.on('connection', (socket) => {
 })
 
 app.get('/login',(req,res) => {
+  console.log(line);
+  console.log("Login page request.");
   res.render('pages/login')
+  
 })
 app.get('/',(req,res) => {
-  // Object.keys(ifaces).forEach((ifname) => {
-  //   ifaces[ifname].forEach((iface) => {
-  //     if (iface.family === 'IPv4') {
-  //       console.log(iface);
-  //       ipAddress = iface.address;
-  //     }
-  //   });
-  // });
+  console.log(line);
+  console.log("Homepage request.");
   ipAddress = IP.address();
   console.log(`Server IP address is ${ipAddress}`);
 
@@ -113,39 +112,60 @@ app.get('/',(req,res) => {
   })
 })
 app.get('/linux',(req,res) => {
+  console.log(line);
+  console.log("Linux config page request.");
   var inventory = fs.readFileSync('resources/inventory/linux_host.ini','utf8'); 
-  console.log(inventory);
+  // console.log(inventory);
   res.render('pages/linuxConfig',{
     inventoryRead:inventory
   })
 })
 app.get('/windows',(req,res) => {
+  console.log(line);
+  console.log("Windows config page request.");
   res.render('pages/windowsConfig')
 })
 app.get('/vmware',(req,res) => {
+  console.log(line);
+  console.log("Vmware config page request.");
   res.render('pages/vmwareConfig')
 })
 app.get('/isilon',(req,res) => {
+  console.log(line);
+  console.log("Isilon config page request.");
   res.render('pages/isilonConfig')
 })
+app.get('/nbu',(req,res) => {
+  console.log(line);
+  console.log("NetBackuo config page request.");
+  res.render('pages/netbackupConfig')
+})
+app.get('/grafana',(req,res) => {
+  console.log(line);
+  console.log("Grafana config page request.");
+  res.render('pages/grafanaConfig')
+})
 app.get('/influxdb',(req,res) => {
+  console.log(line);
+  console.log("InfluxDB page request.");
   res.render('pages/influxdbConfig')
 })
 app.get('/prometheus',(req,res) => {
+  console.log(line);
+  console.log("Prometheus config page request.");
   ipAddress = IP.address();
   res.render('pages/prometheusConfig',{
     IPADDR : ipAddress
   })
 })
-app.get('/grafana',(req,res) => {
-  res.render('pages/grafanaConfig')
-})
+
 app.get('/createReport',(req,res) => {
   res.render('pages/createReport')
 })
 app.get('/LinuxConfig/ReadFile',(req,res) => {
+  console.log(line);
+  console.log("Linux readfile json request.");
   var inventory = fs.readFileSync('resources/inventory/linux_host.json','utf8'); 
-  //console.log(inventory);
   let data ;
   if(inventory == ""){
     data = 'empty';
@@ -155,31 +175,27 @@ app.get('/LinuxConfig/ReadFile',(req,res) => {
   res.status(200).send(data);
 })
 app.get('/WindowsConfig/ReadFile',(req,res) => {
+  console.log(line);
+  console.log("Windows readfile json request.");
   var inventory = fs.readFileSync('resources/inventory/windows_host.json','utf8'); 
-  //console.log(inventory);
   let data ;
-  if(inventory == ""){
-    data = 'empty';
-  }else{
-    data = inventory;
-  }
+  if(inventory == ""){data = 'empty';}else{data = inventory;}
   res.status(200).send(data);
 })
 
 app.get('/InfluxDBConfig/ReadFile',(req,res) => {
-  console.log('/InfluxDBConfig/ReadFile');
+  console.log(line);
+  console.log("Influxdb readfile json request.");
   var config = fs.readFileSync('resources/influxdb/influxdb.json','utf8'); 
   console.log(config);
   let data ;
-  if(config == ""){
-    data = 'empty';
-  }else{
-    data = config;
-  }
+  if(config == ""){data = 'empty';}else{data = config;}
   res.status(200).send(data);
 })
 
 app.get('/PrometheusConfig/ReadFileYML',(req,res) => {
+  console.log(line);
+  console.log("Prometheus readfile yml request.");
   var inventory = fs.readFileSync('prometheus/prometheus.yml','utf8'); 
   console.log(inventory);
   let data ;
@@ -191,8 +207,9 @@ app.get('/PrometheusConfig/ReadFileYML',(req,res) => {
   res.status(200).send(data);
 })
 app.get('/PrometheusConfig/ReadFileJSON',(req,res) => {
+  console.log(line);
+  console.log("Prometheus readfile json request.");
   var inventory = fs.readFileSync('prometheus/prometheus.json','utf8'); 
-  console.log(inventory);
   let data ;
   if(inventory == ""){
     data = 'empty';
@@ -213,6 +230,9 @@ app.get('/PrometheusConfig/ReadFile',(req,res) => {
   res.status(200).send(data);
 })
 app.post('/PrometheusConfig/ReadFileByName',(req,res) => {
+  console.log(line);
+  console.log("Prometheus readfile by name request.");
+
   const job_index = req.body.job_index;
   var inventory = fs.readFileSync('prometheus/prometheus.json','utf8'); 
   let targets_json = JSON.parse(inventory); 
@@ -229,15 +249,17 @@ app.post('/PrometheusConfig/ReadFileByName',(req,res) => {
   res.status(200).send(data);
 })
 app.post('/PrometheusConfig/SaveFile',(req,res) => {
+  console.log(line);
+  console.log("Prometheus savefile request.");
   //let statusYML = 0;
   //let statusJSON = 0;
   let new_job = req.body.text 
   let new_job_obj = req.body.tempData
-  console.log(jsonPromData);
-  console.log(new_job_obj);
-  console.log('length : '+jsonPromData.collectors.length);
+  // console.log(jsonPromData);
+  // console.log(new_job_obj);
+  // console.log('length : '+jsonPromData.collectors.length);
   jsonPromData.collectors[jsonPromData.collectors.length] = new_job_obj;
-  console.log(JSON.stringify(jsonPromData));
+  //console.log(JSON.stringify(jsonPromData));
 
   // Save .json
   var oldData = fs.readFileSync('prometheus/prometheus.json','utf8'); 
@@ -281,8 +303,10 @@ app.post('/PrometheusConfig/SaveFile',(req,res) => {
 
 })
 app.post('/PrometheusConfig/EnSaveFile',(req,res) => {
+  console.log(line);
+  console.log("Prometheus engineer save yml file request.");
   let new_cfg = req.body.cfg 
-  console.log(new_cfg);
+  //console.log(new_cfg);
   fs.writeFile(__dirname+'/prometheus/prometheus.yml', new_cfg.toString() , function (err) {
     if (err) throw err;
     console.log('New text saved to file Prom.yml!');
@@ -290,8 +314,10 @@ app.post('/PrometheusConfig/EnSaveFile',(req,res) => {
   });
 })
 app.post('/PrometheusConfig/EnSaveJsonFile',(req,res) => {
-  let new_cfg = req.body.cfg 
-  console.log(new_cfg);
+  console.log(line);
+  console.log("Prometheus engineer save json file request.");
+  const new_cfg = req.body.cfg 
+  //console.log(new_cfg);
   fs.writeFile(__dirname+'/prometheus/prometheus.json', new_cfg.toString() , function (err) {
     if (err) throw err;
     console.log('New text saved to file Prom.json!');
@@ -300,6 +326,8 @@ app.post('/PrometheusConfig/EnSaveJsonFile',(req,res) => {
 })
 
 app.post('/LinuxConfig/SaveFile',(req,res) => {
+  console.log(line);
+  console.log("Linux save config file request.");
   try {
     if(req.body.text === undefined){
       fs.writeFile(__dirname+'/resources/inventory/linux_host.json',"", function (err) {
@@ -355,8 +383,9 @@ app.post('/WindowsConfig/SaveFile',(req,res) => {
   }
 })
 app.get('/isilonConfig/ReadFile',(req,res) => {
+  console.log(line);
+  console.log("Isilon read json file request.");
   var config = fs.readFileSync(__dirname+'/resources/isilon/isilon.json','utf8'); 
-
   let data ;
   if(config == ""){
     data = 'empty';
@@ -366,6 +395,8 @@ app.get('/isilonConfig/ReadFile',(req,res) => {
   res.status(200).send(data);
 })
 app.get('/isilonConfig/ReadFileCFG',(req,res) => {
+  console.log(line);
+  console.log("Isilon read cfg file request.");
   var config = fs.readFileSync(__dirname+'/resources/isilon/isi_data_insights_d.cfg','utf8'); 
 
   let data ;
@@ -377,8 +408,10 @@ app.get('/isilonConfig/ReadFileCFG',(req,res) => {
   res.status(200).send(data);
 })
 app.post('/isilonConfig/EnSaveFile',(req,res) => {
+  console.log(line);
+  console.log("Isilon engineer mode save file request.");
   let new_cfg = req.body.cfg 
-  console.log(new_cfg);
+  // console.log(new_cfg);
   fs.writeFile(__dirname+'/resources/isilon/isi_data_insights_d.cfg', new_cfg.toString() , function (err) {
     if (err) throw err;
     console.log('New text saved to file isi_data_insights_d.cfg!');
@@ -386,10 +419,12 @@ app.post('/isilonConfig/EnSaveFile',(req,res) => {
   });
 })
 app.post('/isilonConfig/CreateConfigFile',(req,res) => {
+  console.log(line);
+  console.log("Isilon create config file request.");
   let cfg = req.body.cfg 
   ipAddress = IP.address();
-  console.log(ipAddress);
-  console.log(cfg);
+  // console.log(ipAddress);
+  // console.log(cfg);
   const cmd = `
   chmod 777 $(pwd)/resources/isilon/* ;
   chmod 777 $(pwd)/resources/isilon/temp/* ;
@@ -411,6 +446,96 @@ app.post('/isilonConfig/CreateConfigFile',(req,res) => {
     })
 
 })
+
+app.post('/NBUConfig/CreateConfigFile',(req,res) => {
+  console.log(line);
+  console.log("INBU create config file request.");
+  let cfg = req.body.cfg 
+  ipAddress = IP.address();
+  // console.log(ipAddress);
+  // console.log(cfg);
+  const cmd = `
+  chmod 777 $(pwd)/resources/nbu/* ;
+  chmod 777 $(pwd)/resources/nbu/temp/* ;
+  cp $(pwd)/resources/nbu/config.yaml $(pwd)/resources/nbu/temp/config.yaml; \
+  cd resources/nbu/temp;
+  sed -i'.old' -e 's/<PORT>/${cfg.port}/g' \
+  -e 's/<Your_NBU_Domain>/${cfg.domain}/g'  -e 's/<Your_NBU_Host>/${cfg.hostip}/g' \
+  -e 's/<Your_apiKey>/${cfg.token}/g' *;
+  `;
+  var response;
+    subProcess.exec(cmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err)
+        res.status(500).send(stderr);
+      } else {
+        response = stdout
+        console.log(response);
+        res.status(200).send('ok');
+      }
+    })
+
+})
+
+app.get('/NBUConfig/ReadFile',(req,res) => {
+  console.log(line);
+  console.log("NBU read json file request.");
+  var config = fs.readFileSync(__dirname+'/resources/nbu/nbu.json','utf8'); 
+  let data ;
+  if(config == ""){
+    data = 'empty';
+  }else{
+    data = config;
+  }
+  res.status(200).send(data);
+})
+
+app.post('/NBUConfig/EnSaveFile',(req,res) => {
+  console.log(line);
+  console.log("NBU save json file engineer request.");
+  let new_cfg = req.body.cfg 
+  fs.writeFile(__dirname+'/resources/nbu/nbu.json', new_cfg.toString() , function (err) {
+    if (err) throw err;
+    console.log('New text saved to file nbu.json!');
+    res.status(200).send('ok')
+  });
+})
+
+app.post('/NBUConfig/SaveFile',(req,res) => {
+  console.log(line);
+  console.log("NBU save json file request.");
+  //let statusYML = 0;
+  //let statusJSON = 0;
+  const service_name = req.body.service_name;
+  let data = req.body.data 
+  console.log(data);
+  // console.log('data[${hostip}]...');
+  // console.log(data[`${hostip}`]);
+
+  // jsonPromData.collector[jsonPromData.collector.length] = new_job_obj;
+  // console.log(JSON.stringify(jsonPromData));
+
+  // Save .json
+  var oldData = JSON.parse(fs.readFileSync('resources/nbu/nbu.json','utf8')); 
+  console.log("Old Data Before...");
+  console.log(oldData);
+  console.log('####################################');
+
+  oldData[`${service_name}`] = data;
+
+  console.log("\nOld Data After...");
+  console.log(oldData);
+  console.log('####################################');
+  fs.writeFile(__dirname+'/resources/nbu/nbu.json', JSON.stringify(oldData) , function (err) {
+    if (err) throw err;
+    console.log('New text appended to file nbu.json!');
+    statusJSON = 1;
+  });
+
+  res.status(200).send('ok')
+
+})
+
 
 app.get('/VmwareConfig/ReadFileJSON',(req,res) => {
   var inventory = fs.readFileSync('resources/vmware/vsphere_host.json','utf8'); 
@@ -622,13 +747,24 @@ app.post('/DockerRun',(req,res) => {
     })
 })
 
+app.post('/InfluxDBConfig/EnSaveJsonFile',(req,res) => {
+  console.log(line);
+  console.log("InfluxDB engineer save json file request.");
+  const new_cfg = req.body.cfg 
+  //console.log(new_cfg);
+  fs.writeFile(__dirname+'/resources/influxdb/influxdb.json', new_cfg.toString() , function (err) {
+    if (err) throw err;
+    console.log('New text saved to file influxdb.json!');
+    res.status(200).send('ok')
+  });
+})
+
 app.post('/InfluxDBConfig/SaveFile',(req,res) => {
   //let statusYML = 0;
   //let statusJSON = 0;
   const service_name = req.body.service_name;
   let port = req.body.port 
   console.log(service_name);
-
 
   // jsonPromData.collector[jsonPromData.collector.length] = new_job_obj;
   // console.log(JSON.stringify(jsonPromData));

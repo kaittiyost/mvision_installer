@@ -306,7 +306,7 @@
                     url: "/InfluxDBConfig/SaveFile",
                     method: "POST",
                     data: {
-                      service_name : service_name,
+                      service_name : service_name+port,
                       port : port
                     },
                     success: function (response) {

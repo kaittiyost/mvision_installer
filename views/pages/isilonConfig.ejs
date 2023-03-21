@@ -125,18 +125,7 @@
                       </a>
               </div>
               <div class="card-body">
-                <!-- <table class="table table-striped table-hover" id="tableGroup">
-                  <thead>
-                    <tr>
-                      <th scope="col">#</th>
-                      <th scope="col">Host</th>
-                      <th scope="col">Username</th>
-                      <th scope="col">Port</th>
-                      <th scope="col">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tableBodyHost"></tbody>
-                </table> -->
+              
               </div>
             </div>
           </div>
@@ -223,17 +212,6 @@
         <script src="/socket.io/socket.io.js"></script>
         <script>
           var socket = io();
-          // function RunPrometheusOnDocker() {
-          //   $('#btnInstall').attr('disabled',true)
-          //   $('#Console').focus()
-          //   $('#output').append('Installing...')
-          //   const command='docker run -d --name prometheus  -p 9090:9090 -v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus ';
-          //   socket.emit('dataCMD', { cmd: command});
-          //   socket.on('output', (data) => {
-          //       const output = document.getElementById('output');
-          //       output.innerHTML += data;
-          //   });
-          // }
 
           function showModal(){
             $.ajax({
@@ -298,41 +276,33 @@
                         console.log(response);
                         $('#output').append(response)
 
-                        $('#table_docker_reunned').append(
-                            `<tr>
-                                <td>${$('#hostip').val()}</td>
-                                <td>${$('#port').val()}</td>
-                                <td>
-                                    <button class="btn btn-primary" onclick="CurlExporter('isi_mon')">Run</button>
-                                </td>
-                            </tr>`
-                        )
-                        // let dataToJson = {}
-                        // dataToJson[$('#hostip').val()] = {
-                        //     "USERNAME":$('#username').val(),
-                        //     "PASSWORD":$('#password').val(),
-                        //     "PORT":$('#port').val()
-                        // }
-                        // $.ajax({
-                        //     url: "/VmwareConfig/SaveFile",
-                        //     method: "POST",
-                        //     data: { data: dataToJson,hostip:$('#hostip').val()},
-                        //     success: function (response) {
-                        //         if (response == "ok") {
-                        //         //alert("Ok");
-                        //         Swal.fire({
-                        //             icon: 'success',
-                        //             title: 'Containers is ran.',
-                        //             text: 'Successfully run container vmware_exporter.',
-                        //         }).then(()=>{
-                        //             location.reload();
-                        //         })
-                        //         }
-                        //     },
-                        //     error: function (xhr, status, error) {
-                        //         console.error(xhr.responseText);
-                        //     },
-                        //     });
+                        let dataToJson = {}
+                        dataToJson[ `isi_mon_${influxPort}`] = {
+                            "HOST": $('#hostip').val(),
+                            "USERNAME":$('#username').val(),
+                            "PASSWORD":$('#password').val(),
+                            "PORT":$('#port').val(),
+                        }
+                        $.ajax({
+                            url: "/isilonConfig/SaveFile",
+                            method: "POST",
+                            data: { data: dataToJson,hostip:$('#hostip').val()},
+                            success: function (response) {
+                                if (response == "ok") {
+                                //alert("Ok");
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Containers is ran.',
+                                    text: 'Successfully run container isilon.json.',
+                                }).then(()=>{
+                                    location.reload();
+                                })
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                console.error(xhr.responseText);
+                            },
+                            });
 
                       },
                       error: function (xhr, status, error) {

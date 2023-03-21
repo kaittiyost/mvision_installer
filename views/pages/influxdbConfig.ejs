@@ -285,23 +285,23 @@
               method: "POST",
               data:{
                 container_name : container_name,
-                service_name : service_name,
+                service_name : service_name+port,
                 port : port
                 },
               success: function (response) {
                 console.log(response);
                 $('#output').append(response)
 
-                $('#table_docker_reunned').append(
-                    `<tr>
-                        <td>${$('#hostip').val()}</td>
-                        <td>${$('#port').val()}</td>
-                        <td>
-                            <button class="btn btn-primary" onclick="CurlExporter('vmware_exporter')">Run</button>
-                        </td>
-                    </tr>`
-                )
-
+                // $('#table_docker_reunned').append(
+                //     `<tr>
+                //         <td>${$('#hostip').val()}</td>
+                //         <td>${$('#port').val()}</td>
+                //         <td>
+                //             <button class="btn btn-primary" onclick="CurlExporter('vmware_exporter')">Run</button>
+                //         </td>
+                //     </tr>`
+                // )
+                $('#output').append('\nok')
                 $.ajax({
                     url: "/InfluxDBConfig/SaveFile",
                     method: "POST",

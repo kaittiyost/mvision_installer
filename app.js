@@ -502,6 +502,41 @@ app.post('/NBUConfig/EnSaveFile',(req,res) => {
     res.status(200).send('ok')
   });
 })
+app.post('/isilonConfig/SaveFile',(req,res) => {
+  console.log(line);
+  console.log("Isilon save json file request.");
+  //let statusYML = 0;
+  //let statusJSON = 0;
+  const service_name = req.body.service_name;
+  let data = req.body.data 
+  console.log(data);
+  // console.log('data[${hostip}]...');
+  // console.log(data[`${hostip}`]);
+
+  // jsonPromData.collector[jsonPromData.collector.length] = new_job_obj;
+  // console.log(JSON.stringify(jsonPromData));
+
+  // Save .json
+  var oldData = JSON.parse(fs.readFileSync('resources/isilon/isilon.json','utf8')); 
+  console.log("Old Data Before...");
+  console.log(oldData);
+  console.log('####################################');
+
+  oldData[`${service_name}`] = data;
+
+  console.log("\nOld Data After...");
+  console.log(oldData);
+  console.log('####################################');
+  fs.writeFile(__dirname+'/resources/isilon/isilon.json', JSON.stringify(oldData) , function (err) {
+    if (err) throw err;
+    console.log('New text appended to file isilon.json!');
+    statusJSON = 1;
+  });
+
+  res.status(200).send('ok')
+
+})
+
 
 app.post('/NBUConfig/SaveFile',(req,res) => {
   console.log(line);
@@ -766,8 +801,7 @@ app.post('/DockerRun',(req,res) => {
 
     const nbuPort = req.body.nbuPort;
     cmd = `
-    docker run -d -p 0.0.0.0:${nbuPort}:2112/tcp \ 
-    -v  $(pwd)/resources/nbu/temps/config.yaml:/app/config.yaml \
+    docker run -d -p 0.0.0.0:${nbuPort}:2112/tcp -v  $(pwd)/resources/nbu/temps/config.yaml:/app/config.yaml \
     --name nbu_${nbuPort} alansup/nbu_exporter
     `;
    

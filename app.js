@@ -739,18 +739,23 @@ app.post('/DockerRun',(req,res) => {
     alansup/mvi `;
 
   }else if(container_name == "vmware_exporter"){
+
     const hostip = req.body.hostip;
     const username = req.body.username;
     const password = req.body.password;
     const port = req.body.port;
     cmd = 
-    `docker run -d -it --rm  -p 9272:9272 -e VSPHERE_USER=${username} -e VSPHERE_PASSWORD=${password} -e VSPHERE_HOST=${hostip} -e VSPHERE_IGNORE_SSL=True -e VSPHERE_SPECS_SIZE=2000 --name vmware_exporter pryorda/vmware_exporter`
+    `docker run -d -it --rm  -p ${port}:9272 -e VSPHERE_USER=${username} -e VSPHERE_PASSWORD=${password} -e VSPHERE_HOST=${hostip} -e VSPHERE_IGNORE_SSL=True -e VSPHERE_SPECS_SIZE=2000 --name vmware_${port} pryorda/vmware_exporter`
+ 
   }else if(container_name == "influxdb:1.8"){
+
     const service_name = req.body.service_name;
     const port = req.body.port;
     cmd = `docker run -d --name ${service_name} -p 0.0.0.0:${port}:8086 influxdb:1.8`;
+
   }
   else if(container_name == "isi_mon"){
+
     const influxPort = req.body.influxPort;
     cmd = `docker run -d --name ${container_name+'_'+influxPort}  \
     -v $(pwd)/resources/isilon/temps/isi_data_insights_d.cfg:/app/isi_data_insights_d.cfg \
@@ -758,11 +763,12 @@ app.post('/DockerRun',(req,res) => {
    
   }
   else if(container_name == "nbu_exporter"){
+
     const nbuPort = req.body.nbuPort;
     cmd = `
-    docker run -d --name nbu_${nbuPort} -p 0.0.0.0:${nbuPort}:2112/tcp \ 
+    docker run -d -p 0.0.0.0:${nbuPort}:2112/tcp \ 
     -v  $(pwd)/resources/nbu/temps/config.yaml:/app/config.yaml \
-    alansup/nbu_exporter
+    --name nbu_${nbuPort} alansup/nbu_exporter
     `;
    
   }

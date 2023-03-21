@@ -280,27 +280,27 @@
             const port = $('#port').val()
 
             $('#output').append(`Running Container ${container_name}.. \n`)
-            // $.ajax({
-            //   url: "/DockerRun",
-            //   method: "POST",
-            //   data:{
-            //     container_name : container_name,
-            //     service_name : service_name,
-            //     port : port
-            //     },
-            //   success: function (response) {
-            //     console.log(response);
-            //     $('#output').append(response)
+            $.ajax({
+              url: "/DockerRun",
+              method: "POST",
+              data:{
+                container_name : container_name,
+                service_name : service_name,
+                port : port
+                },
+              success: function (response) {
+                console.log(response);
+                $('#output').append(response)
 
-            //     $('#table_docker_reunned').append(
-            //         `<tr>
-            //             <td>${$('#hostip').val()}</td>
-            //             <td>${$('#port').val()}</td>
-            //             <td>
-            //                 <button class="btn btn-primary" onclick="CurlExporter('vmware_exporter')">Run</button>
-            //             </td>
-            //         </tr>`
-            //     )
+                $('#table_docker_reunned').append(
+                    `<tr>
+                        <td>${$('#hostip').val()}</td>
+                        <td>${$('#port').val()}</td>
+                        <td>
+                            <button class="btn btn-primary" onclick="CurlExporter('vmware_exporter')">Run</button>
+                        </td>
+                    </tr>`
+                )
 
                 $.ajax({
                     url: "/InfluxDBConfig/SaveFile",
@@ -326,12 +326,12 @@
                     },
                     });
 
-            //   },
-            //   error: function (xhr, status, error) {
-            //     console.error(xhr.responseText);
-            //     $('#output').append(xhr.responseText)
-            //   },
-            // });
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#output').append(xhr.responseText)
+              },
+            });
 
           }
 

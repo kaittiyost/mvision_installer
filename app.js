@@ -327,7 +327,7 @@ app.post('/PrometheusConfig/EnSaveJsonFile',(req,res) => {
 
 app.post('/LinuxConfig/SaveFile',(req,res) => {
   console.log(line);
-  console.log("Linux save config file request.");
+  console.log("Linux save config json & ini file request.");
   try {
     if(req.body.text === undefined){
       fs.writeFile(__dirname+'/resources/inventory/linux_host.json',"", function (err) {
@@ -359,6 +359,8 @@ app.post('/LinuxConfig/SaveFile',(req,res) => {
 })
 
 app.post('/WindowsConfig/SaveFile',(req,res) => {
+  console.log(line);
+  console.log('Windows save json & ini file request.');
   try {
     fs.writeFile(__dirname+'/resources/inventory/windows_host.json',JSON.stringify(req.body.text_json), function (err) {
       if (err) throw err;
@@ -538,6 +540,8 @@ app.post('/NBUConfig/SaveFile',(req,res) => {
 
 
 app.get('/VmwareConfig/ReadFileJSON',(req,res) => {
+  console.log(line);
+  console.log('Vmware read json file request.');
   var inventory = fs.readFileSync('resources/vmware/vsphere_host.json','utf8'); 
   console.log(inventory);
   let data ;
@@ -549,6 +553,8 @@ app.get('/VmwareConfig/ReadFileJSON',(req,res) => {
   res.status(200).send(data);
 })
 app.get('/VmwareConfig/ReadFile',(req,res) => {
+  console.log(line);
+  console.log('Vmware read file request.');
   var inventory = fs.readFileSync(__dirname+'/resources/vmware/vsphere_host.json','utf8'); 
   //console.log(inventory);
   let data ;
@@ -560,6 +566,8 @@ app.get('/VmwareConfig/ReadFile',(req,res) => {
   res.status(200).send(data);
 })
 app.post('/VmwareConfig/SaveFile',(req,res) => {
+  console.log(line);
+  console.log('Vmware save file request.');
   //let statusYML = 0;
   //let statusJSON = 0;
   const hostip = req.body.hostip;
@@ -592,6 +600,8 @@ app.post('/VmwareConfig/SaveFile',(req,res) => {
 
 })
 app.post('/VmwareConfig/EnSaveJsonFile',(req,res) => {
+  console.log(line);
+  console.log('Vmware engineer mode save file request.');
   let new_cfg = req.body.cfg 
   console.log(new_cfg);
   fs.writeFile(__dirname+'/resources/vmware/vsphere_host.json', new_cfg.toString() , function (err) {
@@ -602,6 +612,8 @@ app.post('/VmwareConfig/EnSaveJsonFile',(req,res) => {
 })
 
 app.get('/PingLinuxNode',(req,res) => {
+  console.log(line);
+  console.log('Ansible ping linux request.');
   const cmd = `
   ansible linux -m ping -i $(pwd)/resources/inventory/linux_host.ini \
   `;
@@ -619,6 +631,8 @@ app.get('/PingLinuxNode',(req,res) => {
 })
 
 app.get('/PingWindowsNode',(req,res) => {
+  console.log(line);
+  console.log('Ansible ping windows request.');
   const cmd = `
   ansible -m win_ping win -i $(pwd)/resources/inventory/windows_host.ini;
   `;
@@ -637,11 +651,13 @@ app.get('/PingWindowsNode',(req,res) => {
 })
 
 app.get('/InstallNodeExporter',(req,res) => {
+  console.log(line);
+  console.log('Install node exporter request.');
   //ansible linux -m ping -i $(pwd)/resources/inventory/linux_host.ini
   //ansible-playbook  $(pwd)/resources/playbook/install-node-exporter.yml -i $(pwd)/resources/inventory/linux_host.ini
   const cmd = `
   cat $(pwd)/resources/inventory/linux_host.ini; \
-   \
+  ansible-playbook  $(pwd)/resources/install-node-exporter.yml -i $(pwd)/resources/inventory/linux_host.ini
   `;
   var response;
   subProcess.exec(cmd, (err, stdout, stderr) => {
@@ -658,6 +674,8 @@ app.get('/InstallNodeExporter',(req,res) => {
 })
 
 app.get('/InstallWindowsExporter',(req,res) => {
+  console.log(line);
+  console.log('Install windows exporter request.');
   const cmd = `
   cat $(pwd)/resources/inventory/windows_host.ini; \
   ansible -m win_ping win -i $(pwd)/resources/inventory/windows_host.ini; \
@@ -677,7 +695,8 @@ app.get('/InstallWindowsExporter',(req,res) => {
 })
 
 app.post('/CurlExporter',(req,res) => {
-
+  console.log(line);
+  console.log('Curl exporter request');
   const ipaddress = req.body.ipaddr;
   const os_type = req.body.os_type;
   let port = 9100;

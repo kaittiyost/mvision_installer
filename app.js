@@ -187,7 +187,7 @@ app.get('/InfluxDBConfig/ReadFile',(req,res) => {
   console.log(line);
   console.log("Influxdb readfile json request.");
   var config = fs.readFileSync('resources/influxdb/influxdb.json','utf8'); 
-  console.log(config);
+  //console.log(config);
   let data ;
   if(config == ""){data = 'empty';}else{data = config;}
   res.status(200).send(data);
@@ -197,7 +197,7 @@ app.get('/PrometheusConfig/ReadFileYML',(req,res) => {
   console.log(line);
   console.log("Prometheus readfile yml request.");
   var inventory = fs.readFileSync('prometheus/prometheus.yml','utf8'); 
-  console.log(inventory);
+  //console.log(inventory);
   let data ;
   if(inventory == ""){
     data = 'empty';
@@ -760,7 +760,7 @@ app.post('/DockerRun',(req,res) => {
   else if(container_name == "nbu_exporter"){
     const nbuPort = req.body.nbuPort;
     cmd = `
-    npm run -d --name nbu_${nbuPort} -p 0.0.0.0:${nbuPort}:2112/tcp \ 
+    docker run -d --name nbu_${nbuPort} -p 0.0.0.0:${nbuPort}:2112/tcp \ 
     -v  $(pwd)/resources/nbu/temps/config.yaml:/app/config.yaml \
     alansup/nbu_exporter
     `;
@@ -847,6 +847,7 @@ app.post('/DockerRestart',(req,res) => {
   console.log(line);
   console.log('Docker restart request.');
   const container_name = req.body.container_name;
+  console.log("container restart :" + container_name);
   const cmd = `
   docker restart ${container_name}
   `;
@@ -866,6 +867,7 @@ app.post('/DockerStop',(req,res) => {
   console.log(line);
   console.log('Docker stop request.');
   const container_name = req.body.container_name;
+  console.log("container stop nad remove :" + container_name);
   const cmd = `docker rm -f ${container_name}`;
   var response;
     subProcess.exec(cmd, (err, stdout, stderr) => {

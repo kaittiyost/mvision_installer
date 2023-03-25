@@ -6,50 +6,11 @@
       let jsonData = {};
       let dataLength = 0;
 
+      var row = 0;
+      let counter = 0;
       $( document ).ready(function() {
         $('#btnAction').attr('disabled',true)
-        $.ajax({
-          url: "/VmwareConfig/ReadFile",
-          method: "GET",
-          success: function (response) {
-            if (response == "empty") {
 
-            } else {
-
-              const jsonObj = JSON.parse(response)
-              const length = Object.keys(jsonObj).length;
-    
-              const myDict = jsonObj;
-              console.log(response);
-              for (const [ip, credentials] of Object.entries(myDict)) {
-                $("#table_docker_reunned").append(
-                  `
-                        <tr>
-                            <td>${ip}</td>
-                            <td>${ credentials["PORT"]}</td>
-                            <td>${ credentials["USERNAME"]}</td>
-                            <td>
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                      ACTIONS
-                                    </button>
-                                    <ul class="dropdown-menu bg-light">
-                                      <li><a class="dropdown-item" id="btnInstall" onclick="RestartContainer('${credentials["SERVICE_NAME"]}'')" href="#">Restart</a></li>
-                                      <li><a class="dropdown-item" id="btnInstall" onclick="StopContainer('${credentials["SERVICE_NAME"]}')" href="#">Stop & Remove</a></li>
-                                    </ul>
-                                </div>  
-                            </td>
-                        </tr>
-                        `
-                );
-
-              }
-            }
-          },
-          error: function (xhr, status, error) {
-            console.error(xhr.responseText);
-          },
-        });
       })
     </script>
   </head>
@@ -60,7 +21,7 @@
       <%- include('../partials/nav') %>
       <div class="container-fluid py-4">
         <div class="row mt-4">
-          <div class="col-lg-5 mb-lg-0 mb-4">
+          <div class="col-lg mb-lg-0 mb-4">
             <div class="card">
               <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
@@ -84,28 +45,6 @@
                   </div>
                 </div>
               </div>
-   
-              <div class="p-3">
-               <div class="row">
-                <div id="GroupNameShow"></div>
-               </div>
-              </div>
-              <div class="table-responsive p-3">
-                <table class="table align-items-center">
-                    <thead>
-                        <th>Host IP</th>
-                        <th>Port</th>
-                        <th>Username</th>
-                        <th>Action</th>
-                    </thead>
-                    <tbody id="table_docker_reunned">
-                    </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-7 mb-lg-0 mb-4">
-            <div class="card">
               <div class="card-header pb-0 p-3">
                 <h6 class="mb-2">Host Vsphere on Vmware-Exporter.</h6>
                 <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#newGroupModal">
@@ -116,20 +55,65 @@
                         <i class="ni ni-bold-right" aria-hidden="true"></i> Open Engineer Mode
                       </a>
               </div>
-              <div class="card-body">
-                <table class="table table-striped table-hover" id="tableGroup">
-                  <thead>
+              <div class="table-responsive">
+                <table class="table align-items-center">
+                  <thead class="table-dark">
                     <tr>
-                      <th scope="col">#</th>
-                      <th scope="col">Host</th>
-                      <th scope="col">Username</th>
-                      <th scope="col">Port</th>
-                      <th scope="col">Action</th>
+                      <th>IP Host</th>
+                      <th>Username</th>
+                      <th>Password</th>
+                      <th>OS</th>
+                      <th>Distrubution</th>
+                      <th>Protocol</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
-                  <tbody id="tableBodyHost"></tbody>
+                  <tbody style="text-align: center;" id="table_body">
+                    <% let i = 0; if ( HostList.length > 0 ) { %>
+                        <% HostList.forEach ( function ( reccord, index ) { %>
+                            <tr id="row<%= reccord.host_id %>">
+                                <td>
+                                    <%= reccord.host_ip %>
+                                </td>
+                                <td>
+                                    <%= reccord.host_username; %>
+                                </td>
+                                <td>
+                                  <div class="badge bg-gradient-secondary">**********</div>
+                                </td>
+                                <td>
+                                    <%= reccord.host_os; %>
+                                </td>
+                                <td>
+                                    <%= reccord.host_os_type; %>
+                                </td>
+                                <td>
+                                    <%= reccord.host_protocol; %>
+                                </td>
+                                <td>
+                                  <a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="delHost('<%= reccord.host_ip; %>','<%= reccord.host_id; %>')" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
+                                </td>
+                            </tr>
+                        <% } ); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="100%">- ไม่มีข้อมูล -</td>
+                        </tr>
+                    <% } %>            
+                </tbody>
                 </table>
               </div>
+              <center>
+                <button class="btn btn-success btn-sm ms-auto" id="" onclick="addHost()">
+                  Save
+                </button>
+                <button
+                  class="btn btn-primary btn-sm ms-auto"
+                  onclick="addRow()"
+                >
+                  Add Host
+                </button>
+              </center>
             </div>
           </div>
         </div>
@@ -231,17 +215,97 @@
         <script src="/socket.io/socket.io.js"></script>
         <script>
           var socket = io();
-          // function RunPrometheusOnDocker() {
-          //   $('#btnInstall').attr('disabled',true)
-          //   $('#Console').focus()
-          //   $('#output').append('Installing...')
-          //   const command='docker run -d --name prometheus  -p 9090:9090 -v $(pwd)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus ';
-          //   socket.emit('dataCMD', { cmd: command});
-          //   socket.on('output', (data) => {
-          //       const output = document.getElementById('output');
-          //       output.innerHTML += data;
-          //   });
-          // }
+          
+          function addRow() {
+            $("#table_body").append(
+              `<tr id="row${row}">
+                    <td id="row${row}col0">
+                        <input type="text" id="input_row${row}col0" class="form-control">
+                    </td>
+                    <td id="row${row}col1">
+                        <input type="text" id="input_row${row}col1" class="form-control">
+                    </td>
+                    <td id="row${row}col2">
+                      <input type="text" id="input_row${row}col2" class="form-control">
+                    </td>
+                    <td id="row${row}col3">
+                        <input type="text" id="input_row${row}col3" value="Vmware" disabled  class="form-control">
+                    </td>
+                    <td id="row${row}col4">
+                      <select class="form-control" name="os_type" id="input_row${row}col4" id="os_type">
+                        <option value="vsphere">Vsphere</option>
+                      </select>
+                    </td>
+                    <td id="row${row}col5">
+                      <input type="text" id="input_row${row}col5" value="http" disabled  class="form-control">
+                    </td>
+                    <td id="row${row}col6">
+                        <a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${row})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
+                    </td>
+                </tr>`
+            );
+            row++;
+            counter++;
+            console.log("counter =" + counter);
+          }
+
+          function addHost(){
+            console.log(`size : ${counter}`);
+          
+            let host_ip="",host_os,host_os_type,username,password,protocol;
+            let data_arr = [];
+            for(i=0 ; i< counter; i++){
+              host_ip = $(`#input_row${i}col${0}`).val();
+              username = $(`#input_row${i}col${1}`).val();
+              password = $(`#input_row${i}col${2}`).val();
+              os = $(`#input_row${i}col${3}`).val();
+              os_type = $(`#input_row${i}col${4}`).val();
+              protocol = $(`#input_row${i}col${5}`).val();
+              data_arr.push([host_ip,username,password,os,os_type,protocol])
+
+            }
+            // console.log(data_arr);
+            $.ajax({
+              url: "/vmware/add",
+              method: "POST",
+              data: { data : data_arr },
+              success: function (response) {
+                alert(response)
+                if (response == "ok") {
+                  location.reload();
+                  //alert("Linux host is ready.");
+                  // Swal.fire({
+                  //   icon: 'success',
+                  //   title: 'Hosts changes saved.',
+                  //   text: 'Successfully saved to the windows_host file.',
+                  // }).then(()=>{
+                  //   // location.reload();
+                  // })
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
+
+          function delHost(ip,id){
+            $.ajax({
+              url: "/vmware/del",
+              method: "POST",
+              data: { ipaddr : ip },
+              success: function (response) {
+                if (response == "ok") {
+                  //alert("Linux host is ready.");
+                  $(`#row${id}`).remove()
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+          }
+
 
           function RunContainer(container_name) {
 
@@ -363,68 +427,6 @@
             $('#GroupNameShow').html('You are creating a group : '+group_name)
             $('#job_name_current').val(group_name)
             // console.log(targets_arr);
-          }
-
-          function addRow() {
-            let collectorList = $('#collectorList').val();
-            let path = "";
-            let port = 0;
-            if(collectorList == "linux"){
-              path = "/LinuxConfig/ReadFile"
-              port = 9100;
-            }else if(collectorList == "windows"){
-              path = "/WindowsConfig/ReadFile"
-              port = 9182;
-            }
-            $.ajax({
-              url: path,
-              method: "GET",
-              data: { type: "linux" },
-              success: function (response) {
-                if (response == "empty") {
-                  $("#tableHost").html("Host net set.");
-                  $("#btnAction").attr("onclick", "saveFile()");
-                } else {
-                  const toJson = JSON.parse(response);
-                  
-                  dataLength = Object.keys(toJson).length;
-                  
-                  $("#table_body").empty()
-                  for (i = 0; i < Object.keys(toJson).length; i++) {
-                    let key_array = [];
-                    key_array.push(toJson[`row${i}`][0]);
-                    key_array.push(toJson[`row${i}`][1]);
-
-                    console.log('key_array :'+key_array);
-
-                    jsonData[`row${i}`] = key_array;
-
-                    row++;counter++;
-                    $("#table_body").append(
-                      `<tr id="row${i}">
-                                <td id="row${i}col0">
-                                    <input type="text" id="input_row${i}col0" class="form-control" value="${
-                        JSON.parse(response)[`row${i}`][0]
-                      }">
-                                </td>
-                                <td id="row${i}col1">
-                                    <input type="text" id="input_row${i}col1" class="form-control" value="${
-                       port
-                      }">
-                                </td>
-                                <td id="row${i}col3">
-                                    <a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${row})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
-                                </td>
-                            </tr>`
-                    );
-                    $("#btnAction").attr("onclick", "saveFile()");
-                  }
-                }
-              },
-              error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-              },
-            });
           }
 
           function saveFileEnMode() {

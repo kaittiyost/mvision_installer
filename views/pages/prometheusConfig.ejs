@@ -112,10 +112,9 @@
               <div class="table-responsive p-3">
                 <table class="table align-items-center">
                   <thead>
-                    <tr>
+                    <tr style="text-align: center;">
                       <th>Targets Host</th>
                       <th>Targets Port</th>
-                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody id="table_body">
@@ -169,7 +168,35 @@
                       <th scope="col">Action</th>
                     </tr>
                   </thead>
-                  <tbody id="tableBodyHost"></tbody>
+                  <tbody style="text-align: center;" id="table_body">
+                    <% let i = 0; if ( HostList.length > 0 ) { %>
+                        <% HostList.forEach ( function ( reccord, index ) { %>
+                            <tr id="row<%= reccord.host_id %>">
+                                <td>
+                                    <%= i+1 %>
+                                </td>
+                                <td>
+                                    <%= reccord.job_name %>
+                                </td>
+                                <td>
+                                  <div class="btn-group">
+                                    <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                      ACTIONS
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                      <li><a class="dropdown-item" onclick="configTarget('<%= reccord.job_name %>')" href="#">Config</a></li>
+                                      <li><a class="dropdown-item" onclick="delJob('<%= reccord.job_name %>')" href="#">Remove</a></li>
+                                    </ul>
+                                  </div>
+                                </td>
+                            </tr>
+                        <% } ); %>
+                    <% } else { %>
+                        <tr>
+                            <td id="no_data_msg" colspan="100%">- No Data -</td>
+                        </tr>
+                    <% } %>            
+                </tbody>
                 </table>
               </div>
             </div>
@@ -202,14 +229,14 @@
                       <label for="job_name" class="col-form-label">Group name : </label>
                     </div>
                     <div class="col-md">
-                      <input type="text" id="new_group_name" class="form-control">
+                      <input type="text" id="new_job_name" class="form-control">
                     </div>
                   </div>
                 </div>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="createNewGroup()">Create</button>
+                <button type="button" class="btn btn-primary" onclick="addNewJob()">Create</button>
               </div>
             </div>
           </div>
@@ -289,8 +316,23 @@
             });
           }
 
-          function createNewGroup(){
+          function addNewJob(){
             
+            const job_name = $('#new_job_name').val();
+            $.ajax({
+              url: "/prometheus/addJob",
+              method: "POST",
+              data: { job_name : job_name },
+              success: function (response) {
+                if (response == "ok") {
+                  $(`#row${id}`).remove()
+                }
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
+
             let counter = 1;
             $("#tableGroup").append(
               `<tr>
@@ -298,15 +340,37 @@
                         ${counter}
                     </td>
                     <td>
-                        ${$('#new_group_name').val()}
+                        ${job_name}
                     </td>
                     <td>
-                        <button class="btn btn-primary" onclick="configTarget('${$('#new_group_name').val()}')">Config</button>
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                          ACTIONS
+                        </button>
+                        <ul class="dropdown-menu">
+                          <li><a class="dropdown-item" onclick="configTarget('${job_name}')" href="#">Config</a></li>
+                          <li><a class="dropdown-item" onclick="delJob('${job_name}')" href="#">Remove</a></li>
+                        </ul>
+                      </div>
                     </td>
                 </tr>`
             );
             counter++;
             $('#newGroupModal').modal('hide')
+          }
+
+          function delJob(job_name){
+            $.ajax({
+              url: "/prometheus/delJob",
+              method: "POST",
+              data: { job_name : job_name },
+              success: function (response) {
+                alert(response)
+              },
+              error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+              },
+            });
           }
 
           function configTarget(group_name){
@@ -324,88 +388,31 @@
             let path = "";
             let port = 0;
             if(collectorList == "linux"){
-              path = "/LinuxConfig/ReadFile"
+              path = "/linux/get"
               port = 9100;
             }else if(collectorList == "windows"){
-              path = "/WindowsConfig/ReadFile"
+              path = "/windows/get"
               port = 9182;
             }
             else if(collectorList == "vmware"){
-              path = "/VmwareConfig/ReadFile"
+              path = "/vmware/get"
               port = 9272;
             }
 
             $.ajax({
               url: path,
               method: "GET",
-              data: { type: "linux" },
               success: function (response) {
-                if (response == "empty") {
-                  $("#tableHost").html("Host net set.");
-                  $("#btnAction").attr("onclick", "saveFile()");
-                } else {
-                  if(collectorList == "vmware"){
-                    $("#table_body").empty()
-                    console.log(response);
-                    const jsonObj = JSON.parse(response)
-                    const length = Object.keys(jsonObj).length;
-          
-                    const myDict = jsonObj;
-                    let row=0
-                    for (const [ip, credentials] of Object.entries(myDict)) {
-                      $("#table_body").append(
-                        `
-                              <tr id="row${row}">
-                                  <td>
-                                    <input type="text" id="input_row${row}col0" disabled class="form-control" value="${ip}">
-                                  </td>
-                                  <td>
-                                    <input type="text" id="input_row${row}col1" disabled class="form-control" value="${ credentials["PORT"]}">
-                                  </td>
-                                  <td><a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${row})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a></td>
-                              </tr>
-                              `
-                      );
-                              row++;
-                    }
-                  }else{
-
-                  const toJson = JSON.parse(response);
-                  
-                  dataLength = Object.keys(toJson).length;
-                  
-                  $("#table_body").empty()
-                  for (i = 0; i < Object.keys(toJson).length; i++) {
-                    let key_array = [];
-                    key_array.push(toJson[`row${i}`][0]);
-                    key_array.push(toJson[`row${i}`][1]);
-
-                    console.log('key_array :'+key_array);
-
-                    jsonData[`row${i}`] = key_array;
-
-                    row++;counter++;
-                    $("#table_body").append(
-                      `<tr id="row${i}">
-                                <td id="row${i}col0">
-                                    <input type="text" id="input_row${i}col0" class="form-control" value="${
-                        JSON.parse(response)[`row${i}`][0]
-                      }">
-                                </td>
-                                <td id="row${i}col1">
-                                    <input type="text" id="input_row${i}col1" class="form-control" value="${
-                       port
-                      }">
-                                </td>
-                                <td id="row${i}col3">
-                                    <a class="btn btn-link text-danger text-gradient px-3 mb-0" onclick="removeRow(${i})" href="#"><i class="far fa-trash-alt me-2" aria-hidden="true"></i>Remove</a>
-                                </td>
-                            </tr>`
-                    );
-                    $("#btnAction").attr("onclick", "saveFile()");
-                  }
-                  }
-                  
+                console.log(response);
+                for(i=0; i< response.length; i++){
+                  $('#table_body').append(
+                    `
+                    <tr style="text-align: center;">
+                    <td>${response[i].host_ip}</td>
+                    <td>${port}</td>
+                    </tr>
+                    `
+                  )
                 }
               },
               error: function (xhr, status, error) {

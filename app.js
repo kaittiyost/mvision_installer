@@ -7,7 +7,7 @@ const IP = require('ip');
 var fs = require('fs'); 
 
 const { networkInterfaces } = require('os');
-const nets = networkInterfaces();
+
 
 const subProcess = require('child_process')
 
@@ -82,6 +82,26 @@ io.on('connection', (socket) => {
 
 })
 
+// mySQL
+const mysql = require ( "mysql" );
+var connectionMySQL = mysql.createConnection (
+    {
+        host : "localhost"
+        , user : "root"
+        , password : ""
+        , database : "mvision_db"
+        , multipleStatements : true
+    }
+);
+connectionMySQL.connect ( function ( error ) { 
+        if ( error ) {
+            console.log ( error );
+        }else {
+            console.log ( "MySQL Connected!" );
+        }
+    } 
+);
+
 app.get('/login',(req,res) => {
   console.log(line);
   console.log("Login page request.");
@@ -114,21 +134,51 @@ app.get('/',(req,res) => {
 app.get('/linux',(req,res) => {
   console.log(line);
   console.log("Linux config page request.");
-  var inventory = fs.readFileSync('resources/inventory/linux_host.ini','utf8'); 
-  // console.log(inventory);
-  res.render('pages/linuxConfig',{
-    inventoryRead:inventory
-  })
+
+  var sql = "SELECT * FROM hosts WHERE host_os = 'linux' ";
+  connectionMySQL.query ( sql, function ( error, results, fields ){
+        if ( error ) {
+            console.log ( error );
+        }else {
+            console.log(results);
+            res.render('pages/linuxConfig',{
+              HostList : results
+            })
+        }
+    });
+
 })
 app.get('/windows',(req,res) => {
   console.log(line);
   console.log("Windows config page request.");
-  res.render('pages/windowsConfig')
+  var sql = "SELECT * FROM hosts WHERE host_os = 'windows' ";
+  connectionMySQL.query ( sql, function ( error, results, fields ){
+        if ( error ) {
+            console.log ( error );
+        }else {
+            console.log(results);
+            res.render('pages/windowsConfig',{
+              HostList : results
+            })
+        }
+    });
 })
+
 app.get('/vmware',(req,res) => {
   console.log(line);
   console.log("Vmware config page request.");
-  res.render('pages/vmwareConfig')
+
+  var sql = "SELECT * FROM hosts WHERE host_os = 'vmware' ";
+  connectionMySQL.query ( sql, function ( error, results, fields ){
+        if ( error ) {
+            console.log ( error );
+        }else {
+            console.log(results);
+            res.render('pages/vmwareConfig',{
+              HostList : results
+            })
+        }
+    });
 })
 app.get('/isilon',(req,res) => {
   console.log(line);
@@ -537,7 +587,6 @@ app.post('/isilonConfig/SaveFile',(req,res) => {
 
 })
 
-
 app.post('/NBUConfig/SaveFile',(req,res) => {
   console.log(line);
   console.log("NBU save json file request.");
@@ -572,7 +621,6 @@ app.post('/NBUConfig/SaveFile',(req,res) => {
   res.status(200).send('ok')
 
 })
-
 
 app.get('/VmwareConfig/ReadFileJSON',(req,res) => {
   console.log(line);
@@ -953,7 +1001,6 @@ app.post('/AddGrafanaDatasource',(req,res) => {
       }
     })
 })
-
 
 app.get('/login',(req,res) => {
     const cmd = "curl -k -X POST -H 'Accept:application/json' --basic -u intern@vsphere.local:1qaz2wsx#EDC \

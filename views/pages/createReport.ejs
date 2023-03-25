@@ -1,39 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <%- include('../partials/head') %>
-</head>
-<body class="g-sidenav-show   bg-gray-100">
-  <div class="min-height-300 bg-dark position-absolute w-100"></div>
-  <%- include('../partials/sidebar') %>
-  <main class="main-content position-relative border-radius-lg ">
-    <%- include('../partials/nav') %>
+    <script>
+      let jsonData = {};
+      let dataLength = 0;
+
+      $(document).ready(function () {
+        $.ajax({
+          url: "/grafana/getDashboard",
+          method: "GET",
+          success: function (response) {
+            console.log(response);
+            for (i = 0; i < response.length; i++) {
+              // dashbaord test
+              // $('#allgraph').append(`
+              //   <iframe style="width:100%;" src="https://10.4.160.170:3000/d-solo/roHB5Of4k/new-dashboard?orgId=1&from=1679610203792&to=1679631803792&theme=light&panelId=${response[i].id}" width="790" height="340" frameborder="0"></iframe>
+              // `)
+
+              // dashboard pm test
+              $("#allgraph").append(`
+                  <div>
+                    <iframe style="width:100%;" src="https://10.4.160.170:3000/d-solo/W5KDrdKnz/node-exporter-for-prometheus-dashboard-based-on-11074?orgId=1&from=1679625403074&to=1679629003074&theme=light&panelId=${response[i].id}" width="390" height="340" frameborder="0"></iframe>
+                  </div>
+                    `);
+            }
+
+            // $('#cpu_graph').html(`
+            //   <iframe style="width:100%;" src="https://10.4.160.170:3000/d-solo/W5KDrdKnz/node-exporter-for-prometheus-dashboard-based-on-11074?orgId=1&from=1679625403074&to=1679629003074&theme=light&panelId=7" width="790" height="340" frameborder="0"></iframe>
+            // `)
+            // $('#mem_graph').html(`
+            //   <iframe style="width:100%" src="https://10.4.160.170:3000/d-solo/W5KDrdKnz/node-exporter-for-prometheus-dashboard-based-on-11074?orgId=1&from=1679625403074&to=1679629003074&theme=light&panelId=156" width="790" height="340" frameborder="0"></iframe>
+            // `)
+            // $('#disk_graph').html(`
+            //   <iframe style="width:100%" src="https://10.4.160.170:3000/d-solo/W5KDrdKnz/node-exporter-for-prometheus-dashboard-based-on-11074?orgId=1&from=1679625403074&to=1679629003074&theme=light&panelId=168" width="790" height="340" frameborder="0"></iframe>
+            // `)
+          },
+          error: function (xhr, status, error) {
+            console.error(xhr.responseText);
+          },
+        });
+      });
+    </script>
+  </head>
+  <body class="g-sidenav-show bg-white">
     <div class="container-fluid py-4">
-        <h3 class="text-white">New Report</h3>
       <div class="row">
-        <div class="col-lg-12 mb-lg-0 mb-4">
-            <div class="card">
-              <div class="card-header pb-0 p-3">
-                <h6 class="mb-2">Grafana Dashboard (Mvision)</h6>
-                
-              </div>
-              <div class="card-body">
-                <div>
-                    Choose Dashboard
-                    <select name="" id="">
-                        <option value="">Windows-Dashbaord</option>
-                        <option value="">Redhat7-Dashbaord</option>
-                    </select>
-                </div>
-                <br>
-                
-              </div>
+        <div class="col-xl-12 mb-xl-0 mb-4">
+          <div class="">
+            <div class="p-3">
+              <h5>Performance</h5>
+              <p>Performance Graph<br /></p>
+
+              <div id="allgraph"></div>
+              <!-- CPU Usage
+                <div id="cpu_graph"></div>
+
+                Memory Usage
+                <div id="mem_graph"></div>
+
+                Disk Usage
+                <div id="disk_graph"></div> -->
+                <br><br>
+              <h5>Stroage Utilization</h5>
+              <table
+                class="table table-bordered border-secondary"
+                id="table_storage_util"
+                style="width: 100%"
+              >
+                <thead class="align-text-top text-dark">
+                  <tr>
+                    <th>Datastore</th>
+                    <th>Max Capacity (GB)</th>
+                    <th>Used (GB)</th>
+                    <th>Usage %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    class="text-danger"
+                    onclick="ShowUtilizationDetail('esx-CIB1BPRDAPP',511744,12005)"
+                  >
+                    <td>esx-CIB1BPRDAPP</td>
+                    <td>500</td>
+                    <td>488</td>
+                    <td>98</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-danger"
+                    onclick="ShowUtilizationDetail('esx-CIB1BPRDWEB',121600,19042)"
+                  >
+                    <td>esx-CIB1BPRDWEB</td>
+                    <td>119</td>
+                    <td>100</td>
+                    <td>84</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-dark"
+                    onclick="ShowUtilizationDetail('esx-hdd01',4864,4146)"
+                  >
+                    <td>esx-hdd01</td>
+                    <td>5</td>
+                    <td>1</td>
+                    <td>20</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-dark"
+                    onclick="ShowUtilizationDetail('esx-hdd02',4864,4146)"
+                  >
+                    <td>esx-hdd02</td>
+                    <td>5</td>
+                    <td>1</td>
+                    <td>20</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-dark"
+                    onclick="ShowUtilizationDetail('esx-IB1APRDLDAP',245504,114883)"
+                  >
+                    <td>esx-IB1APRDLDAP</td>
+                    <td>240</td>
+                    <td>128</td>
+                    <td>53</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-warning"
+                    onclick="ShowUtilizationDetail('esx-IB1BPRDAPP',511744,104010)"
+                  >
+                    <td>esx-IB1BPRDAPP</td>
+                    <td>500</td>
+                    <td>398</td>
+                    <td>80</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-danger"
+                    onclick="ShowUtilizationDetail('esx-IB1BPRDDB',1202944,68144)"
+                  >
+                    <td>esx-IB1BPRDDB</td>
+                    <td>1175</td>
+                    <td>1108</td>
+                    <td>94</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-danger"
+                    onclick="ShowUtilizationDetail('esx-IB1BPRDWEB',121600,19043)"
+                  >
+                    <td>esx-IB1BPRDWEB</td>
+                    <td>119</td>
+                    <td>100</td>
+                    <td>84</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-dark"
+                    onclick="ShowUtilizationDetail('esx-mgt-ds01',460544,246952)"
+                  >
+                    <td>esx-mgt-ds01</td>
+                    <td>450</td>
+                    <td>209</td>
+                    <td>46</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-dark"
+                    onclick="ShowUtilizationDetail('esx-placeholder',9984,9098)"
+                  >
+                    <td>esx-placeholder</td>
+                    <td>10</td>
+                    <td>1</td>
+                    <td>10</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-dark"
+                    onclick="ShowUtilizationDetail('esx-placeholder-dc',9984,9099)"
+                  >
+                    <td>esx-placeholder-dc</td>
+                    <td>10</td>
+                    <td>1</td>
+                    <td>10</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-dark"
+                    onclick="ShowUtilizationDetail('ibprdesx-01-local',277504,191535)"
+                  >
+                    <td>ibprdesx-01-local</td>
+                    <td>271</td>
+                    <td>84</td>
+                    <td>31</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-dark"
+                    onclick="ShowUtilizationDetail('ibprdesx-02-local',277504,175829)"
+                  >
+                    <td>ibprdesx-02-local</td>
+                    <td>271</td>
+                    <td>99</td>
+                    <td>37</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-dark"
+                    onclick="ShowUtilizationDetail('ibprdesx-03-local',277504,256049)"
+                  >
+                    <td>ibprdesx-03-local</td>
+                    <td>271</td>
+                    <td>21</td>
+                    <td>8</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-dark"
+                    onclick="ShowUtilizationDetail('ibprdesx-04-local',277504,267168)"
+                  >
+                    <td>ibprdesx-04-local</td>
+                    <td>271</td>
+                    <td>10</td>
+                    <td>4</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-danger"
+                    onclick="ShowUtilizationDetail('snap-0b3e43ca-esx-IB1APRDDB',1218304,83509)"
+                  >
+                    <td>snap-0b3e43ca-esx-IB1APRDDB</td>
+                    <td>1190</td>
+                    <td>1108</td>
+                    <td>93</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-danger"
+                    onclick="ShowUtilizationDetail('snap-0b7aa4de-esx-CIB1APRDAPP',511744,17242)"
+                  >
+                    <td>snap-0b7aa4de-esx-CIB1APRDAPP</td>
+                    <td>500</td>
+                    <td>483</td>
+                    <td>97</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-dark"
+                    onclick="ShowUtilizationDetail('snap-2786f9e1-esx-CIBPRDNFS',306944,82542)"
+                  >
+                    <td>snap-2786f9e1-esx-CIBPRDNFS</td>
+                    <td>300</td>
+                    <td>219</td>
+                    <td>73</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-warning"
+                    onclick="ShowUtilizationDetail('snap-296f751e-esx-IB1APRDAPP',511744,104011)"
+                  >
+                    <td>snap-296f751e-esx-IB1APRDAPP</td>
+                    <td>500</td>
+                    <td>398</td>
+                    <td>80</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-danger"
+                    onclick="ShowUtilizationDetail('snap-3a16896d-esx-IB1APRDWEB',121600,19046)"
+                  >
+                    <td>snap-3a16896d-esx-IB1APRDWEB</td>
+                    <td>119</td>
+                    <td>100</td>
+                    <td>84</td>
+                  </tr>
+                  <tr></tr>
+                  <tr
+                    class="text-danger"
+                    onclick="ShowUtilizationDetail('snap-4918f62e-esx-CIB1APRDWEB',121600,19046)"
+                  >
+                    <td>snap-4918f62e-esx-CIB1APRDWEB</td>
+                    <td>119</td>
+                    <td>100</td>
+                    <td>84</td>
+                  </tr>
+                  <tr></tr>
+                </tbody>
+              </table>
+              <label class="mb-2" for="">**Usage: Normal = 0% - 74%, <label class="text-warning"> High = 75% - 80%</label>, <label class="text-danger">Critical = 81% - 100%</label> **</label>
             </div>
           </div>
+        </div>
       </div>
-      <center>
-        <button class="btn btn-danger mt-2">+</button>
-      </center>
- 
- 
-  <%- include('../partials/footer') %>
+    </div>
+  </body>
+</html>
